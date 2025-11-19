@@ -1,6 +1,14 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { Role } from '../modules/roles/role.entity';
+import { User } from '../modules/users/user.entity';
+import { UserRole } from '../modules/roles/user-role.entity';
+import { OrgUnit } from '../modules/org-unit/org-unit.entity';
+import { CaseStatus } from '../modules/case-status/case-status.entity';
+import { CaseFile } from '../modules/case-file/case-file.entity';
+import { CaseReview } from '../modules/case-review/case-review.entity';
+import { Evidence } from '../modules/evidence/evidence.entity';
+import { AuditLog } from '../modules/audit-log/audit-log.entity';
 
 export const AppDataSource = new DataSource({
   type: 'mssql',
@@ -15,5 +23,5 @@ export const AppDataSource = new DataSource({
     encrypt: false,
     trustServerCertificate: true,
   },
-  entities: [Role],
+  entities: [Role, User, UserRole, OrgUnit, CaseStatus, CaseFile, CaseReview, Evidence, AuditLog],
 });

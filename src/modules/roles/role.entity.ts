@@ -47,7 +47,7 @@ import {
     @Column({ name: 'rol_deleted_by', type: 'int', nullable: true })
     deletedBy?: number;
   
-    //@OneToMany(() => UserRole, (ur) => ur.role)
-    //userRoles: UserRole[];
+    @OneToMany(() => UserRole, (ur) => ur.role)
+    userRoles: UserRole[];
   }
   
