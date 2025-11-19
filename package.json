@@ -15,7 +15,8 @@
     "express-rate-limit": "^7.0.0",
     "helmet": "^7.0.0",
     "morgan": "^1.10.0",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.27"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
