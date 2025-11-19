@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import { Role } from '../modules/roles/role.entity';
 
 export const AppDataSource = new DataSource({
   type: 'mssql',
@@ -8,10 +9,11 @@ export const AppDataSource = new DataSource({
   username: 'admin',
   password: 'Admin!123',
   database: process.env.DB_NAME || 'Pruebamp',
-  synchronize: false,
+  synchronize: true,
   logging: process.env.DB_LOGGING === 'false',
   options: {
     encrypt: false,
     trustServerCertificate: true,
   },
+  entities: [Role],
 });
