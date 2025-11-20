@@ -121,67 +121,6 @@ export class UserService {
     }
   }
 
-  async updateUserPassword(
-    id: number,
-    dto: UpdateUserPasswordDto,
-    currentUserId: number
-  ): Promise<{ message: string }> {
-    try {
-      if (dto.newPassword !== dto.confirmPassword) {
-        const domainError = new DomainError(
-          'La confirmación de la nueva contraseña no coincide.',
-          `Intento de actualizar contraseña con confirmación inválida. usr_id=${id}`,
-          400
-        );
-        this.logger.warn(domainError.internalMessage);
-        throw domainError;
-      }
-
-      await this.ensureUserExists(id);
-
-      const isCurrentValid = await this.userRepository.verifyUserPassword(id, dto.currentPassword);
-
-      if (!isCurrentValid) {
-        const domainError = new DomainError(
-          'La contraseña actual no es correcta.',
-          `Contraseña actual inválida en actualización de usuario. usr_id=${id}`,
-          400
-        );
-        this.logger.warn(domainError.internalMessage);
-        throw domainError;
-      }
-
-      await this.userRepository.updatePassword(id, dto.newPassword, currentUserId);
-
-      return {
-        message: 'Contraseña actualizada correctamente.',
-      };
-    } catch (error) {
-      if (error instanceof DomainError) {
-        this.logger.error(error.internalMessage, (error as Error).stack);
-        throw error;
-      }
-
-      const err = error as any;
-      const msg = typeof err?.message === 'string' ? err.message : '';
-
-      if (msg.toLowerCase().includes('no existe') || msg.toLowerCase().includes('not found')) {
-        const domainError = new DomainError(
-          'El usuario no existe.',
-          `Intento de actualizar contraseña de usuario inexistente. usr_id=${id}. Detalle: ${msg}`,
-          404
-        );
-        this.logger.error(domainError.internalMessage, (error as Error)?.stack);
-        throw domainError;
-      }
-
-      this.handleUnexpectedError(
-        'Error técnico al actualizar contraseña de usuario. SP: usp_User_UpdatePassword',
-        error
-      );
-    }
-  }
-
   async getUserById(id: number): Promise<any> {
     try {
       const row = await this.ensureUserExists(id);

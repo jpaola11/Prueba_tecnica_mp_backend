@@ -5,7 +5,7 @@ import { OrgUnitService } from './org-unit.service';
 import { CreateOrgUnitDto } from './dto/create-org-unit.dto';
 import { UpdateOrgUnitDto } from './dto/org-unit.update.dto';
 import { OrgUnitQueryDto } from './dto/query-unit.dto';
-import { OrgUnitIdParamDto } from './dto/org-unit-id-param.dto';
+import { OrgUnitIdParamDto } from './dto/id-org-unit.dto';
 
 interface AuthRequest extends Request {
   user?: {
@@ -27,7 +27,7 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const query = req.validatedQuery as OrgUnitQueryDto;
-        const result = await orgUnitService.findAll(query);
+        const result = await orgUnitService.listOrgUnits(query);
         res.json(result);
       } catch (error) {
         next(error);
@@ -42,7 +42,7 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.validatedParams as OrgUnitIdParamDto;
-        const item = await orgUnitService.findOne(params.id);
+        const item = await orgUnitService.getOrgUnitById(params.id);
         res.json(item);
       } catch (error) {
         next(error);
@@ -58,7 +58,7 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
       try {
         const body = req.validatedBody as CreateOrgUnitDto;
         const currentUserId = req.user?.id ?? null;
-        const created = await orgUnitService.create(body, currentUserId);
+        const created = await orgUnitService.createOrgUnit(body, currentUserId!);
         res.status(201).json(created);
       } catch (error) {
         next(error);
@@ -76,10 +76,10 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
         const params = req.validatedParams as OrgUnitIdParamDto;
         const body = req.validatedBody as UpdateOrgUnitDto;
         const currentUserId = req.user?.id ?? null;
-        const updated = await orgUnitService.update(
+        const updated = await orgUnitService.updateOrgUnit(
           params.id,
           body,
-          currentUserId,
+          currentUserId!,
         );
         res.json(updated);
       } catch (error) {
@@ -96,7 +96,7 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
       try {
         const params = req.validatedParams as OrgUnitIdParamDto;
         const currentUserId = req.user?.id ?? null;
-        await orgUnitService.remove(params.id, currentUserId);
+        await orgUnitService.softDeleteOrgUnit(params.id, currentUserId!);
         res.status(204).send();
       } catch (error) {
         next(error);

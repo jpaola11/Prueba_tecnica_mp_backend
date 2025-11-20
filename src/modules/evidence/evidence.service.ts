@@ -58,7 +58,7 @@ export class EvidenceService {
       ) {
         const domainError = new DomainError(
           'Ya existe una evidencia con ese número de secuencia para el expediente.',
-          `Violación de índice único al crear evidencia. caseId=${dto.caseId}, seq=${dto.sequenceNumber}. Detalle: ${msg}`,
+          `Violación de índice único al crear evidencia. caseId=${dto.caseId}, seq=${dto.seqNumber}. Detalle: ${msg}`,
           409,
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);

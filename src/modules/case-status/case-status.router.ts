@@ -5,7 +5,7 @@ import { CaseStatusService } from './case-status.service';
 import { CreateCaseStatusDto } from './dto/create-case-status.dto';
 import { UpdateCaseStatusDto } from './dto/case-status.update.dto';
 import { CaseStatusQueryDto } from './dto/query-case-status.dto';
-import { CaseStatusIdParamDto } from './dto/case-status-id-param.dto';
+import { CaseStatusIdParamDto } from './dto/id-case-status.dto';
 
 interface AuthRequest extends Request {
   user?: {
@@ -29,23 +29,8 @@ export function buildCaseStatusRouter(
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const query = req.validatedQuery as CaseStatusQueryDto;
-        const result = await caseStatusService.findAll(query);
+        const result = await caseStatusService.listActiveStatuses();
         res.json(result);
-      } catch (error) {
-        next(error);
-      }
-    },
-  );
-
-  router.get(
-    '/:id',
-    jwtAuthMiddleware,
-    validateDto(CaseStatusIdParamDto, 'params'),
-    async (req: AuthRequest, res: Response, next: NextFunction) => {
-      try {
-        const params = req.validatedParams as CaseStatusIdParamDto;
-        const item = await caseStatusService.findOne(params.id);
-        res.json(item);
       } catch (error) {
         next(error);
       }
@@ -60,7 +45,7 @@ export function buildCaseStatusRouter(
       try {
         const body = req.validatedBody as CreateCaseStatusDto;
         const currentUserId = req.user?.id ?? null;
-        const created = await caseStatusService.create(body, currentUserId);
+        const created = await caseStatusService.createStatus(body, currentUserId!);
         res.status(201).json(created);
       } catch (error) {
         next(error);
@@ -78,10 +63,10 @@ export function buildCaseStatusRouter(
         const params = req.validatedParams as CaseStatusIdParamDto;
         const body = req.validatedBody as UpdateCaseStatusDto;
         const currentUserId = req.user?.id ?? null;
-        const updated = await caseStatusService.update(
+        const updated = await caseStatusService.updateStatus(
           params.id,
           body,
-          currentUserId,
+          currentUserId!,
         );
         res.json(updated);
       } catch (error) {
@@ -98,7 +83,7 @@ export function buildCaseStatusRouter(
       try {
         const params = req.validatedParams as CaseStatusIdParamDto;
         const currentUserId = req.user?.id ?? null;
-        await caseStatusService.remove(params.id, currentUserId);
+        await caseStatusService.softDeleteStatus(params.id, currentUserId!);
         res.status(204).send();
       } catch (error) {
         next(error);

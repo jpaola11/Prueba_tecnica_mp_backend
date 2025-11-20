@@ -5,7 +5,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/user.update.dto';
 import { UserQueryDto } from './dto/query-user.dto';
-import { UserIdParamDto } from './dto/user-id-param.dto';
+import { UserIdParamDto } from './dto/id-user.dto';
 
 interface AuthRequest extends Request {
   user?: {
@@ -27,7 +27,7 @@ export function buildUserRouter(userService: UserService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const query = req.validatedQuery as UserQueryDto;
-        const result = await userService.findAll(query);
+        const result = await userService.listUsers(query);
         res.json(result);
       } catch (error) {
         next(error);
@@ -42,7 +42,7 @@ export function buildUserRouter(userService: UserService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.validatedParams as UserIdParamDto;
-        const user = await userService.findOne(params.id);
+        const user = await userService.getUserById(params.id);
         res.json(user);
       } catch (error) {
         next(error);
@@ -58,7 +58,7 @@ export function buildUserRouter(userService: UserService): Router {
       try {
         const body = req.validatedBody as CreateUserDto;
         const currentUserId = req.user?.id ?? null;
-        const created = await userService.create(body, currentUserId);
+        const created = await userService.createUser(body, currentUserId!);
         res.status(201).json(created);
       } catch (error) {
         next(error);
@@ -76,7 +76,7 @@ export function buildUserRouter(userService: UserService): Router {
         const params = req.validatedParams as UserIdParamDto;
         const body = req.validatedBody as UpdateUserDto;
         const currentUserId = req.user?.id ?? null;
-        const updated = await userService.update(params.id, body, currentUserId);
+        const updated = await userService.updateUser(params.id, body, currentUserId!);
         res.json(updated);
       } catch (error) {
         next(error);
@@ -92,7 +92,7 @@ export function buildUserRouter(userService: UserService): Router {
       try {
         const params = req.validatedParams as UserIdParamDto;
         const currentUserId = req.user?.id ?? null;
-        await userService.remove(params.id, currentUserId);
+        await userService.softDeleteUser(params.id, currentUserId!);
         res.status(204).send();
       } catch (error) {
         next(error);

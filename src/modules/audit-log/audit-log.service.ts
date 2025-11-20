@@ -16,11 +16,7 @@ export class AuditLogService {
         (error as Error)?.message ?? String(error)
       }`;
 
-      this.logger.error(
-        internalMessage,
-        (error as Error)?.stack,
-        AuditLogService.name,
-      );
+      this.logger.error(internalMessage, (error as Error)?.stack, AuditLogService.name);
     }
   }
 
@@ -70,5 +66,33 @@ export class AuditLogService {
     };
 
     await this.register(dto);
+  }
+
+  async findAll() {
+    try {
+      return await this.auditLogRepository.findAll();
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener todos los logs de auditoría. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+
+      this.logger.error(internalMessage, (error as Error)?.stack, AuditLogService.name);
+
+      throw error;
+    }
+  }
+
+  async findOne(id: number) {
+    try {
+      return await this.auditLogRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener el log de auditoría con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+
+      this.logger.error(internalMessage, (error as Error)?.stack, AuditLogService.name);
+
+      throw error;
+    }
   }
 }

@@ -5,7 +5,7 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/role.update.dto';
 import { RoleQueryDto } from './dto/query-role.dto';
-import { RoleIdParamDto } from './dto/role-id-param.dto';
+import { RoleIdParamDto } from './dto/id-role.dto';
 
 interface AuthRequest extends Request {
   user?: {
@@ -27,23 +27,8 @@ export function buildRoleRouter(roleService: RoleService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const query = req.validatedQuery as RoleQueryDto;
-        const result = await roleService.findAll(query);
+        const result = await roleService.listActiveRoles();
         res.json(result);
-      } catch (error) {
-        next(error);
-      }
-    },
-  );
-
-  router.get(
-    '/:id',
-    jwtAuthMiddleware,
-    validateDto(RoleIdParamDto, 'params'),
-    async (req: AuthRequest, res: Response, next: NextFunction) => {
-      try {
-        const params = req.validatedParams as RoleIdParamDto;
-        const role = await roleService.findOne(params.id);
-        res.json(role);
       } catch (error) {
         next(error);
       }
@@ -58,7 +43,7 @@ export function buildRoleRouter(roleService: RoleService): Router {
       try {
         const body = req.validatedBody as CreateRoleDto;
         const currentUserId = req.user?.id ?? null;
-        const created = await roleService.create(body, currentUserId);
+        const created = await roleService.createRole(body, currentUserId!);
         res.status(201).json(created);
       } catch (error) {
         next(error);
@@ -76,7 +61,7 @@ export function buildRoleRouter(roleService: RoleService): Router {
         const params = req.validatedParams as RoleIdParamDto;
         const body = req.validatedBody as UpdateRoleDto;
         const currentUserId = req.user?.id ?? null;
-        const updated = await roleService.update(params.id, body, currentUserId);
+        const updated = await roleService.updateRole(params.id, body, currentUserId!);
         res.json(updated);
       } catch (error) {
         next(error);
@@ -92,7 +77,7 @@ export function buildRoleRouter(roleService: RoleService): Router {
       try {
         const params = req.validatedParams as RoleIdParamDto;
         const currentUserId = req.user?.id ?? null;
-        await roleService.remove(params.id, currentUserId);
+        await roleService.softDeleteRole(params.id, currentUserId!);
         res.status(204).send();
       } catch (error) {
         next(error);

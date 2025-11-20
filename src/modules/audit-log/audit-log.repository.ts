@@ -28,7 +28,27 @@ export class AuditLogRepository {
         dto.sourceIp ?? null,
         dto.userAgent ?? null,
         dto.correlationId ?? null,
-      ],
+      ]
     );
+  }
+
+  async findAll(): Promise<any[]> {
+    const rows = await this.dataSource.query(
+      `
+      EXEC dbo.usp_AuditLog_List;
+      `
+    );
+    return rows;
+  }
+
+  async findOne(id: number): Promise<any | null> {
+    const rows = await this.dataSource.query(
+      `
+      EXEC dbo.usp_AuditLog_GetById
+        @log_id = @0;
+      `,
+      [id]
+    );
+    return rows[0] ?? null;
   }
 }

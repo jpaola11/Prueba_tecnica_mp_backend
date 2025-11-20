@@ -23,7 +23,6 @@ export function buildEvidenceModule(
   const evidenceRepository = new EvidenceRepository(dataSource);
   const evidenceService = new EvidenceService(
     evidenceRepository,
-    auditLogService,
   );
   const router = buildEvidenceRouter(evidenceService);
 

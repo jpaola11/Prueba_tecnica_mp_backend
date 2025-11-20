@@ -5,7 +5,7 @@ import { CaseFileService } from './case-file.service';
 import { CreateCaseFileDto } from './dto/create-case-file.dto';
 import { UpdateCaseFileDto } from './dto/case-file.upadate.dto';
 import { CaseFileQueryDto } from './dto/query-case-file.dto';
-import { CaseFileIdParamDto } from './dto/case-file-id-param.dto';
+import { CaseFileIdParamDto } from './dto/id-case-file.dto';
 import { ChangeCaseStatusDto } from './dto/change-case-status.dto';
 
 interface AuthRequest extends Request {
@@ -30,7 +30,7 @@ export function buildCaseFileRouter(
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const query = req.validatedQuery as CaseFileQueryDto;
-        const result = await caseFileService.findAll(query);
+        const result = await caseFileService.listCases(query);
         res.json(result);
       } catch (error) {
         next(error);
@@ -45,7 +45,7 @@ export function buildCaseFileRouter(
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.validatedParams as CaseFileIdParamDto;
-        const item = await caseFileService.findOne(params.id);
+        const item = await caseFileService.getCaseById(params.id);
         res.json(item);
       } catch (error) {
         next(error);
@@ -61,7 +61,7 @@ export function buildCaseFileRouter(
       try {
         const body = req.validatedBody as CreateCaseFileDto;
         const currentUserId = req.user?.id ?? null;
-        const created = await caseFileService.create(body, currentUserId);
+        const created = await caseFileService.createCase(body, currentUserId!);
         res.status(201).json(created);
       } catch (error) {
         next(error);
@@ -79,10 +79,10 @@ export function buildCaseFileRouter(
         const params = req.validatedParams as CaseFileIdParamDto;
         const body = req.validatedBody as UpdateCaseFileDto;
         const currentUserId = req.user?.id ?? null;
-        const updated = await caseFileService.update(
+        const updated = await caseFileService.updateCase(
           params.id,
           body,
-          currentUserId,
+          currentUserId!,
         );
         res.json(updated);
       } catch (error) {
@@ -104,7 +104,7 @@ export function buildCaseFileRouter(
         const updated = await caseFileService.changeStatus(
           params.id,
           body,
-          currentUserId,
+          currentUserId!,
         );
         res.json(updated);
       } catch (error) {
