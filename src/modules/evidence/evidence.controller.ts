@@ -23,7 +23,7 @@ import {
   import { CreateEvidenceDto } from './dto/create-evidence.dto';
   import { UpdateEvidenceDto } from './dto/evidence.update.dto';
   import { EvidenceQueryDto } from './dto/query-evidence.dto';
-  import { IdParamDto } from 'src/dto/shared/query-helpers.dto';
+  import { IdParamDto } from '../../dto/helpers.dto';
   
   class EvidenceResponseDto {
     id!: number;

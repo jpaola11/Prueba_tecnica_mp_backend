@@ -25,7 +25,7 @@ import {
   import { UpdateCaseFileDto } from './dto/case-file.upadate.dto';
   import { CaseFileQueryDto } from './dto/query-case-file.dto';
   import { ChangeCaseStatusDto } from './dto/change-case-status.dto';
-  import { IdParamDto } from 'src/dto/shared/query-helpers.dto';
+  import { IdParamDto } from '../../dto/helpers.dto';
   
   class CaseFileResponseDto {
     id!: number;

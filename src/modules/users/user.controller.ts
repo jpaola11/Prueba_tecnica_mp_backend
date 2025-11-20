@@ -25,7 +25,7 @@ import {
   import { UpdateUserDto } from './dto/user.update.dto';
   import { UserQueryDto } from './dto/query-user.dto';
   import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
-  import { IdParamDto } from 'src/dto/shared/query-helpers.dto';
+  import { IdParamDto } from '../../dto/helpers.dto';
   
   class UserResponseDto {
     id!: number;

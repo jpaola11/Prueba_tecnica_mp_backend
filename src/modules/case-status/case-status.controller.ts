@@ -21,7 +21,7 @@ import {
   import { CaseStatusService } from './case-status.service';
   import { CreateCaseStatusDto } from './dto/create-case-status.dto';
   import { UpdateCaseStatusDto } from './dto/case-status.update.dto';
-  import { IdParamDto } from 'src/dto/shared/query-helpers.dto';
+  import { IdParamDto } from '../../dto/helpers.dto';
   
   class CaseStatusResponseDto {
     id!: number;

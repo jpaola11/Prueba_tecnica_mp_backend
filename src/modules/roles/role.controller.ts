@@ -23,7 +23,7 @@ import {
   import { RoleService } from './role.service';
   import { CreateRoleDto } from './dto/create-role.dto';
   import { UpdateRoleDto } from './dto/role.update.dto';
-  import { IdParamDto } from 'src/dto/shared/query-helpers.dto';
+  import { IdParamDto } from '../../dto/helpers.dto';
   
   class RoleResponseDto {
     id!: number;

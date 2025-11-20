@@ -23,7 +23,7 @@ import {
   import { CreateOrgUnitDto } from './dto/create-org-unit.dto';
   import { UpdateOrgUnitDto } from './dto/org-unit.update.dto';
   import { OrgUnitQueryDto } from './dto/query-unit.dto';
-  import { IdParamDto } from 'src/dto/shared/query-helpers.dto';
+  import { IdParamDto } from '../../dto/helpers.dto';
   
   class OrgUnitResponseDto {
     id!: number;
