@@ -19,7 +19,7 @@ import {
     id: number;
   
     @Index({ unique: true })
-    @Column({ name: 'usr_username', type: 'nvarchar', length: 50 })
+    @Column({ name: 'usr_username', type: 'nvarchar', length: 100 })
     username: string;
   
     @Column({ name: 'usr_password_hash', type: 'nvarchar', length: 200 })

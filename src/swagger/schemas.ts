@@ -1946,7 +1946,7 @@
  *           type: string
  *           format: email
  *           description: Correo electrónico del usuario.
- *           example: "jdoe@example.com"
+ *           example: "jgomez@mp.com.gt"
  *         fullName:
  *           type: string
  *           description: Nombre completo del usuario.

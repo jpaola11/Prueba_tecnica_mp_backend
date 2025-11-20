@@ -19,7 +19,7 @@ export class CreateUserDto {
     type: String,
   })
   @IsString()
-  @Length(1, 50)
+  @Length(1, 100)
   username!: string;
 
   @ApiProperty({
