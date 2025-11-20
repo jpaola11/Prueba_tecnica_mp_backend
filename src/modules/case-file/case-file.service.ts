@@ -1,4 +1,3 @@
-// src/modules/case-file/case-file.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { CaseFileRepository } from './case-file.repository';
 import { CreateCaseFileDto } from './dto/create-case-file.dto';
