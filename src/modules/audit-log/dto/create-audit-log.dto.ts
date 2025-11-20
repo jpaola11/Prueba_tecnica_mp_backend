@@ -83,7 +83,7 @@ export class CreateAuditLogDto {
   })
   @IsOptional()
   @IsString()
-  oldValues?: string;
+  oldValues?: string | undefined | null;
 
   @ApiPropertyOptional({
     name: 'newValues',
@@ -95,7 +95,7 @@ export class CreateAuditLogDto {
   })
   @IsOptional()
   @IsString()
-  newValues?: string;
+  newValues?: string | undefined | null;
 
   @ApiPropertyOptional({
     name: 'sourceIp',
@@ -108,7 +108,7 @@ export class CreateAuditLogDto {
   @IsOptional()
   @IsString()
   @Length(0, 50)
-  sourceIp?: string;
+  sourceIp?: string | undefined | null;
 
   @ApiPropertyOptional({
     name: 'userAgent',
@@ -122,7 +122,7 @@ export class CreateAuditLogDto {
   @IsOptional()
   @IsString()
   @Length(0, 500)
-  userAgent?: string;
+  userAgent?: string | undefined | null;
 
   @ApiPropertyOptional({
     name: 'correlationId',
@@ -135,5 +135,5 @@ export class CreateAuditLogDto {
   @IsOptional()
   @IsString()
   @Length(0, 100)
-  correlationId?: string;
+  correlationId?: string | undefined | null;
 }

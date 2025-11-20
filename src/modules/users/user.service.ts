@@ -28,7 +28,7 @@ export class UserService {
 
   async createUser(
     dto: CreateUserDto,
-    currentUserId: number,
+    currentUserId: number
   ): Promise<{ message: string; userId: number }> {
     try {
       const userId = await this.userRepository.create(dto, currentUserId);
@@ -54,23 +54,20 @@ export class UserService {
         const domainError = new DomainError(
           'Ya existe un usuario con ese nombre de usuario o correo electrónico.',
           `Violación de índice único al crear usuario. username=${dto.username}, email=${dto.email}. Detalle: ${msg}`,
-          409,
+          409
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
       }
 
-      this.handleUnexpectedError(
-        'Error técnico al crear usuario. SP: usp_User_Insert',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al crear usuario. SP: usp_User_Insert', error);
     }
   }
 
   async updateUser(
     id: number,
     dto: UpdateUserDto,
-    currentUserId: number,
+    currentUserId: number
   ): Promise<{ message: string; user: any }> {
     try {
       const existing = await this.ensureUserExists(id);
@@ -79,7 +76,7 @@ export class UserService {
         throw new DomainError(
           'El usuario fue eliminado y no puede modificarse.',
           `Intento de actualizar usuario eliminado. usr_id=${id}`,
-          409,
+          409
         );
       }
 
@@ -114,32 +111,47 @@ export class UserService {
         const domainError = new DomainError(
           'Ya existe un usuario con ese nombre de usuario o correo electrónico.',
           `Violación de índice único al actualizar usuario. usr_id=${id}, username=${dto.username}, email=${dto.email}. Detalle: ${msg}`,
-          409,
+          409
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
       }
 
-      this.handleUnexpectedError(
-        'Error técnico al actualizar usuario. SP: usp_User_Update',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al actualizar usuario. SP: usp_User_Update', error);
     }
   }
 
   async updateUserPassword(
     id: number,
     dto: UpdateUserPasswordDto,
-    currentUserId: number,
+    currentUserId: number
   ): Promise<{ message: string }> {
     try {
+      if (dto.newPassword !== dto.confirmPassword) {
+        const domainError = new DomainError(
+          'La confirmación de la nueva contraseña no coincide.',
+          `Intento de actualizar contraseña con confirmación inválida. usr_id=${id}`,
+          400
+        );
+        this.logger.warn(domainError.internalMessage);
+        throw domainError;
+      }
+
       await this.ensureUserExists(id);
 
-      await this.userRepository.updatePassword(
-        id,
-        dto.passwordHash,
-        currentUserId,
-      );
+      const isCurrentValid = await this.userRepository.verifyUserPassword(id, dto.currentPassword);
+
+      if (!isCurrentValid) {
+        const domainError = new DomainError(
+          'La contraseña actual no es correcta.',
+          `Contraseña actual inválida en actualización de usuario. usr_id=${id}`,
+          400
+        );
+        this.logger.warn(domainError.internalMessage);
+        throw domainError;
+      }
+
+      await this.userRepository.updatePassword(id, dto.newPassword, currentUserId);
 
       return {
         message: 'Contraseña actualizada correctamente.',
@@ -153,14 +165,11 @@ export class UserService {
       const err = error as any;
       const msg = typeof err?.message === 'string' ? err.message : '';
 
-      if (
-        msg.toLowerCase().includes('no existe') ||
-        msg.toLowerCase().includes('not found')
-      ) {
+      if (msg.toLowerCase().includes('no existe') || msg.toLowerCase().includes('not found')) {
         const domainError = new DomainError(
           'El usuario no existe.',
           `Intento de actualizar contraseña de usuario inexistente. usr_id=${id}. Detalle: ${msg}`,
-          404,
+          404
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
@@ -168,7 +177,7 @@ export class UserService {
 
       this.handleUnexpectedError(
         'Error técnico al actualizar contraseña de usuario. SP: usp_User_UpdatePassword',
-        error,
+        error
       );
     }
   }
@@ -183,15 +192,12 @@ export class UserService {
         throw error;
       }
 
-      this.handleUnexpectedError(
-        'Error técnico al obtener usuario. SP: usp_User_GetById',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al obtener usuario. SP: usp_User_GetById', error);
     }
   }
 
   async listUsers(
-    query: UserQueryDto,
+    query: UserQueryDto
   ): Promise<{ items: any[]; total: number; page: number; limit: number }> {
     try {
       const page =
@@ -210,9 +216,7 @@ export class UserService {
       const start = (page - 1) * limit;
       const end = start + limit;
 
-      const items = rows
-        .slice(start, end)
-        .map((row) => this.mapDbUserToResponse(row));
+      const items = rows.slice(start, end).map((row) => this.mapDbUserToResponse(row));
 
       return {
         items,
@@ -221,17 +225,11 @@ export class UserService {
         limit,
       };
     } catch (error) {
-      this.handleUnexpectedError(
-        'Error técnico al listar usuarios. SP: usp_User_List',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al listar usuarios. SP: usp_User_List', error);
     }
   }
 
-  async softDeleteUser(
-    id: number,
-    currentUserId: number,
-  ): Promise<{ message: string }> {
+  async softDeleteUser(id: number, currentUserId: number): Promise<{ message: string }> {
     try {
       const existing = await this.ensureUserExists(id);
 
@@ -239,7 +237,7 @@ export class UserService {
         throw new DomainError(
           'El usuario ya se encuentra eliminado.',
           `Soft delete repetido sobre usuario. usr_id=${id}`,
-          409,
+          409
         );
       }
 
@@ -257,14 +255,11 @@ export class UserService {
       const err = error as any;
       const msg = typeof err?.message === 'string' ? err.message : '';
 
-      if (
-        msg.toLowerCase().includes('no existe') ||
-        msg.toLowerCase().includes('not found')
-      ) {
+      if (msg.toLowerCase().includes('no existe') || msg.toLowerCase().includes('not found')) {
         const domainError = new DomainError(
           'El usuario no existe o ya fue eliminado.',
           `Intento de eliminar usuario inexistente. usr_id=${id}. Detalle: ${msg}`,
-          404,
+          404
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
@@ -272,7 +267,7 @@ export class UserService {
 
       this.handleUnexpectedError(
         'Error técnico al eliminar usuario. SP: usp_User_SoftDelete',
-        error,
+        error
       );
     }
   }
@@ -281,11 +276,7 @@ export class UserService {
     const row = await this.userRepository.getById(id);
 
     if (!row) {
-      throw new DomainError(
-        'El usuario no existe.',
-        `User no encontrado para id=${id}`,
-        404,
-      );
+      throw new DomainError('El usuario no existe.', `User no encontrado para id=${id}`, 404);
     }
 
     return row;
@@ -303,8 +294,7 @@ export class UserService {
       fullName: row.usr_full_name ?? row.fullName,
       orgUnitId: row.usr_org_unit_id ?? row.orgUnitId ?? null,
       isActive: row.usr_is_active ?? row.isActive ?? true,
-      mustChangePassword:
-        row.usr_must_change_password ?? row.mustChangePassword ?? false,
+      mustChangePassword: row.usr_must_change_password ?? row.mustChangePassword ?? false,
       lastLoginAt: row.usr_last_login_at ?? row.lastLoginAt ?? null,
       createdAt: row.usr_created_at ?? row.createdAt,
       createdBy: row.usr_created_by ?? row.createdBy,
@@ -317,20 +307,14 @@ export class UserService {
   }
 
   private handleUnexpectedError(action: string, error: unknown): never {
-    const internalMessage = `${action}. Detalle: ${
-      (error as Error)?.message ?? String(error)
-    }`;
+    const internalMessage = `${action}. Detalle: ${(error as Error)?.message ?? String(error)}`;
 
-    this.logger.error(
-      internalMessage,
-      (error as Error)?.stack,
-      UserService.name,
-    );
+    this.logger.error(internalMessage, (error as Error)?.stack, UserService.name);
 
     throw new DomainError(
       'Ocurrió un error al procesar la solicitud. Inténtelo de nuevo más tarde.',
       internalMessage,
-      500,
+      500
     );
   }
 }

@@ -1,4 +1,3 @@
-// src/modules/org-unit/org-unit.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { OrgUnitRepository } from './org-unit.repository';
 import { CreateOrgUnitDto } from './dto/create-org-unit.dto';
