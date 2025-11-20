@@ -2,12 +2,12 @@ import { AppDataSource } from './config/db.config';
 import { buildApp } from './app';
 import { setupSwagger } from './swagger';
 import cors from 'cors';
+import express, { Application } from 'express';
 
 export async function startServer() {
   await AppDataSource.initialize();
   console.log('[DB] Conectado a SQL Server');
-
-  const app = buildApp(AppDataSource);
+  const app = express();
 
   app.use(
     cors({
@@ -18,6 +18,12 @@ export async function startServer() {
       exposedHeaders: ['Authorization'],
     })
   );
+
+  app.use(express.json());
+
+  const expressApp = buildApp(AppDataSource);
+
+  app.use('/api', expressApp);
 
   setupSwagger(app);
 
