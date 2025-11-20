@@ -110,7 +110,7 @@ export function buildAuditLogRouter(auditLogService: AuditLogService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const query = req.query as unknown as AuditLogQueryDto;
-        const result = await auditLogService.findAll(query);
+        const result = await auditLogService.findAll();
         res.json(result);
       } catch (error) {
         next(error);

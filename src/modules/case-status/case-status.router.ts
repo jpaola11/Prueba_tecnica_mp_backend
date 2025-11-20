@@ -1,5 +1,3 @@
-// Router
-
 import { Router, Request, Response, NextFunction } from 'express';
 import { jwtAuthMiddleware } from '../../middlewares/jwt-auth.middleware';
 import { validateDto } from '../../middlewares/validate-dto.middleware';
