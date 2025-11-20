@@ -8,6 +8,8 @@ export class UserRepository {
   constructor(private readonly dataSource: DataSource) {}
 
   async create(dto: CreateUserDto, currentUserId: number): Promise<number> {
+    const passwordHash = await bcrypt.hash(dto.password, 12);
+
     const result = await this.dataSource.query(
       `
       DECLARE @usr_id_out INT;
@@ -27,7 +29,7 @@ export class UserRepository {
       `,
       [
         dto.username,
-        dto.password,
+        passwordHash,
         dto.email,
         dto.fullName,
         dto.orgUnitId ?? null,

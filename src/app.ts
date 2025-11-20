@@ -9,10 +9,13 @@ import { buildCaseStatusModule } from './modules/case-status/case-status.module'
 import { buildCaseFileModule } from './modules/case-file/case-file.module';
 import { buildEvidenceModule } from './modules/evidence/evidence.module';
 import { buildCaseReviewModule } from './modules/case-review/case-review.module';
+import { buildAuthModule } from './modules/auth/auth.module';
 
 export function buildApp(dataSource: DataSource): Application {
   const app = express();
   app.use(express.json());
+
+  const authModule = buildAuthModule({ dataSource });
 
   // 1) Módulo de auditoría (core dependency)
   const auditLogModule = buildAuditLogModule({ dataSource });
@@ -54,6 +57,7 @@ export function buildApp(dataSource: DataSource): Application {
   });
 
   // 3) Montar routers
+  app.use('/auth', authModule.router);
   app.use('/audit-logs', auditLogModule.router);
   app.use('/users', userModule.router);
   app.use('/org-units', orgUnitModule.router);
