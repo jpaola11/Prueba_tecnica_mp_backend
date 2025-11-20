@@ -1,8 +1,8 @@
 // src/modules/role/role.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { RoleRepository } from './role.repository';
-import { CreateRoleDto } from './dto/create-user-role.dto';
-import { UpdateRoleDto } from './dto/user-role.update.dto';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/role.update.dto';
 
 class DomainError extends Error {
   readonly userMessage: string;
