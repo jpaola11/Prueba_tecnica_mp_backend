@@ -1,4 +1,3 @@
-// src/modules/case-status/case-status.repository.ts
 import { DataSource } from 'typeorm';
 import { CreateCaseStatusDto } from './dto/create-case-status.dto';
 import { UpdateCaseStatusDto } from './dto/case-status.update.dto';

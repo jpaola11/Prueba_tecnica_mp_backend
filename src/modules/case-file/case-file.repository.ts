@@ -114,15 +114,13 @@ export class CaseFileRepository {
         @cas_code        = @0,
         @cas_status_id   = @1,
         @cas_org_unit_id = @2,
-        @date_from       = @3,
-        @date_to         = @4;
+        @date_from       = @3;
       `,
       [
         query.code ?? null,
         query.statusId ?? null,
         query.orgUnitId ?? null,
-        query.openDateFrom ?? null,
-        query.openDateTo ?? null,
+        query.openDate ?? null,
       ],
     );
 

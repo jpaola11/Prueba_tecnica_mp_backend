@@ -1,4 +1,3 @@
-// src/modules/case-status/case-status.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { CaseStatusRepository } from './case-status.repository';
 import { CreateCaseStatusDto } from './dto/create-case-status.dto';

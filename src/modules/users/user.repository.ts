@@ -1,8 +1,8 @@
-// src/modules/user/user.repository.ts
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/user.update.dto';
 import { UserQueryDto } from './dto/query-user.dto';
+import * as bcrypt from 'bcrypt';
 
 export class UserRepository {
   constructor(private readonly dataSource: DataSource) {}
@@ -27,14 +27,14 @@ export class UserRepository {
       `,
       [
         dto.username,
-        dto.passwordHash,
+        dto.password,
         dto.email,
         dto.fullName,
         dto.orgUnitId ?? null,
         dto.isActive ?? true,
         dto.mustChangePassword ?? false,
         currentUserId,
-      ],
+      ]
     );
 
     const row = Array.isArray(result) && result[0] ? result[0] : null;
@@ -45,11 +45,7 @@ export class UserRepository {
     return Number(row.usr_id);
   }
 
-  async update(
-    id: number,
-    dto: UpdateUserDto,
-    currentUserId: number,
-  ): Promise<void> {
+  async update(id: number, dto: UpdateUserDto, currentUserId: number): Promise<void> {
     await this.dataSource.query(
       `
       EXEC dbo.usp_User_Update
@@ -71,15 +67,11 @@ export class UserRepository {
         dto.isActive ?? true,
         dto.mustChangePassword ?? false,
         currentUserId,
-      ],
+      ]
     );
   }
 
-  async updatePassword(
-    id: number,
-    passwordHash: string,
-    currentUserId: number,
-  ): Promise<void> {
+  async updatePassword(id: number, passwordHash: string, currentUserId: number): Promise<void> {
     await this.dataSource.query(
       `
       EXEC dbo.usp_User_UpdatePassword
@@ -87,7 +79,7 @@ export class UserRepository {
         @usr_password_hash = @1,
         @usr_updated_by    = @2;
       `,
-      [id, passwordHash, currentUserId],
+      [id, passwordHash, currentUserId]
     );
   }
 
@@ -97,7 +89,7 @@ export class UserRepository {
       EXEC dbo.usp_User_GetById
         @usr_id = @0;
       `,
-      [id],
+      [id]
     );
 
     return Array.isArray(rows) && rows[0] ? rows[0] : null;
@@ -110,7 +102,7 @@ export class UserRepository {
         @org_unit_id = @0,
         @only_active = @1;
       `,
-      [query.orgUnitId ?? null, query.onlyActive ?? true],
+      [query.orgUnitId ?? null, query.onlyActive ?? true]
     );
 
     return Array.isArray(rows) ? rows : [];
@@ -123,7 +115,25 @@ export class UserRepository {
         @usr_id        = @0,
         @usr_deleted_by = @1;
       `,
-      [id, currentUserId],
+      [id, currentUserId]
     );
+  }
+
+  async verifyUserPassword(userId: number, plainPassword: string): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `
+      SELECT usr_password_hash AS passwordHash
+      FROM [User]
+      WHERE usr_id = @0 AND usr_is_deleted = 0
+      `,
+      [userId]
+    );
+
+    if (!result || result.length === 0) return false;
+
+    const storedHash = result[0]?.passwordHash;
+    if (!storedHash) return false;
+
+    return bcrypt.compare(plainPassword, storedHash);
   }
 }

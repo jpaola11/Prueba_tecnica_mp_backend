@@ -1,4 +1,3 @@
-// src/modules/org-unit/org-unit.repository.ts
 import { DataSource } from 'typeorm';
 import { CreateOrgUnitDto } from './dto/create-org-unit.dto';
 import { UpdateOrgUnitDto } from './dto/org-unit.update.dto';

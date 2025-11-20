@@ -1,4 +1,3 @@
-// src/modules/audit-log/audit-log.repository.ts
 import { DataSource } from 'typeorm';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 
