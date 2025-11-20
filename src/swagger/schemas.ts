@@ -2065,3 +2065,135 @@
  *       required:
  *         - id
  */
+// Swagger components
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     GenericMessageResponseDto:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: Mensaje descriptivo del resultado de la operación.
+ *       required:
+ *         - message
+ *
+ *     LoginDto:
+ *       type: object
+ *       description: Datos de autenticación requeridos para iniciar sesión.
+ *       properties:
+ *         usernameOrEmail:
+ *           type: string
+ *           description: Nombre de usuario o correo electrónico registrado en el sistema.
+ *           minLength: 1
+ *           maxLength: 150
+ *           example: "juan.perez"
+ *         password:
+ *           type: string
+ *           description: Contraseña en texto plano para autenticación.
+ *           minLength: 1
+ *           maxLength: 200
+ *           example: "MiContraseñaSegura123"
+ *       required:
+ *         - usernameOrEmail
+ *         - password
+ *
+ *     RefreshTokenDto:
+ *       type: object
+ *       description: Datos necesarios para refrescar el par de tokens JWT.
+ *       properties:
+ *         refreshToken:
+ *           type: string
+ *           description: Token de actualización emitido previamente por el sistema.
+ *           minLength: 1
+ *           maxLength: 1000
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTcwMDk5OTk5OX0.abc123"
+ *       required:
+ *         - refreshToken
+ *
+ *     ChangePasswordDto:
+ *       type: object
+ *       description: Datos necesarios para cambiar la contraseña del usuario autenticado.
+ *       properties:
+ *         currentPassword:
+ *           type: string
+ *           description: Contraseña actual del usuario, utilizada para validar el cambio.
+ *           minLength: 1
+ *           maxLength: 200
+ *           example: "MiContraseñaActual123"
+ *         newPassword:
+ *           type: string
+ *           description: Nueva contraseña que se desea establecer para el usuario.
+ *           minLength: 8
+ *           maxLength: 200
+ *           example: "MiNuevaContraseñaSegura456"
+ *         confirmNewPassword:
+ *           type: string
+ *           description: Confirmación de la nueva contraseña; debe coincidir exactamente con newPassword.
+ *           minLength: 8
+ *           maxLength: 200
+ *           example: "MiNuevaContraseñaSegura456"
+ *       required:
+ *         - currentPassword
+ *         - newPassword
+ *         - confirmNewPassword
+ *
+ *     LoginResponseDto:
+ *       type: object
+ *       description: Respuesta devuelta tras una autenticación exitosa.
+ *       properties:
+ *         accessToken:
+ *           type: string
+ *           description: Token JWT de acceso que debe enviarse en la cabecera Authorization.
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         refreshToken:
+ *           type: string
+ *           description: Token JWT de actualización para obtener nuevos tokens de acceso.
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         tokenType:
+ *           type: string
+ *           description: Tipo de token utilizado en la cabecera de autenticación.
+ *           example: "Bearer"
+ *         expiresIn:
+ *           type: integer
+ *           format: int32
+ *           description: Tiempo en segundos hasta la expiración del token de acceso.
+ *           example: 3600
+ *         user:
+ *           $ref: '#/components/schemas/UserResponseDto'
+ *       required:
+ *         - accessToken
+ *         - refreshToken
+ *         - tokenType
+ *         - expiresIn
+ *         - user
+ *
+ *     RefreshTokenResponseDto:
+ *       type: object
+ *       description: Respuesta devuelta al refrescar un par de tokens JWT.
+ *       properties:
+ *         accessToken:
+ *           type: string
+ *           description: Nuevo token JWT de acceso.
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         refreshToken:
+ *           type: string
+ *           description: Nuevo token JWT de actualización.
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         tokenType:
+ *           type: string
+ *           description: Tipo de token utilizado en la cabecera de autenticación.
+ *           example: "Bearer"
+ *         expiresIn:
+ *           type: integer
+ *           format: int32
+ *           description: Tiempo en segundos hasta la expiración del nuevo token de acceso.
+ *           example: 3600
+ *       required:
+ *         - accessToken
+ *         - refreshToken
+ *         - tokenType
+ *         - expiresIn
+ */
