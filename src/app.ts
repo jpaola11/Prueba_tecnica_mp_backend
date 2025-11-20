@@ -57,15 +57,15 @@ export function buildApp(dataSource: DataSource): Application {
   });
 
   // 3) Montar routers
-  app.use('/auth', authModule.router);
-  app.use('/audit-logs', auditLogModule.router);
-  app.use('/users', userModule.router);
-  app.use('/org-units', orgUnitModule.router);
-  app.use('/roles', roleModule.router);
-  app.use('/case-statuses', caseStatusModule.router);
-  app.use('/case-files', caseFileModule.router);
-  app.use('/evidences', evidenceModule.router);
-  app.use('/case-reviews', caseReviewModule.router);
+  app.use('/api/auth', authModule.router);
+  app.use('/api/audit-logs', auditLogModule.router);
+  app.use('/api/users', userModule.router);
+  app.use('/api/org-units', orgUnitModule.router);
+  app.use('/api/roles', roleModule.router);
+  app.use('/api/case-statuses', caseStatusModule.router);
+  app.use('/api/case-files', caseFileModule.router);
+  app.use('/api/evidences', evidenceModule.router);
+  app.use('/api/case-reviews', caseReviewModule.router);
 
   return app;
 }

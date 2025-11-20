@@ -1,15 +1,24 @@
 import { AppDataSource } from './config/db.config';
 import { buildApp } from './app';
 import { setupSwagger } from './swagger';
+import cors from 'cors';
 
 export async function startServer() {
   await AppDataSource.initialize();
   console.log('[DB] Conectado a SQL Server');
 
   const app = buildApp(AppDataSource);
-  const expressApp = buildApp(AppDataSource);
 
-  app.use('/api', expressApp);
+  app.use(
+    cors({
+      origin: ['http://localhost:5173', 'http://localhost:3001'],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+      exposedHeaders: ['Authorization'],
+    })
+  );
+
   setupSwagger(app);
 
   const port = Number(process.env.PORT) || 3001;
