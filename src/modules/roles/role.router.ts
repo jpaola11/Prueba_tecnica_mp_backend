@@ -58,7 +58,7 @@ export function buildRoleRouter(roleService: RoleService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -116,7 +116,7 @@ export function buildRoleRouter(roleService: RoleService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -190,7 +190,7 @@ export function buildRoleRouter(roleService: RoleService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -244,7 +244,59 @@ export function buildRoleRouter(roleService: RoleService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
+  );
+
+  /**
+   * @openapi
+   * /roles/{id}:
+   *   get:
+   *     summary: Obtener detalle de un rol por su identificador
+   *     description: Devuelve la información detallada de un rol activo, buscado por su ID.
+   *     tags:
+   *       - Roles
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: Identificador numérico del rol
+   *         schema:
+   *           type: integer
+   *     responses:
+   *       200:
+   *         description: Rol encontrado y devuelto correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/RoleResponseDto'
+   *       404:
+   *         description: No se encontró un rol con el ID especificado.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar obtener el rol.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   */
+  router.get(
+    '/:id',
+    jwtAuthMiddleware,
+    validateDto(RoleIdParamDto, 'params'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const id = Number(req.params.id);
+        const result = await roleService.getRoleById(id);
+        res.json(result);
+      } catch (error) {
+        next(error);
+      }
+    }
   );
 
   return router;

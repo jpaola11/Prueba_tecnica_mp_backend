@@ -1,7 +1,6 @@
-// src/modules/role/role.repository.ts
 import { DataSource } from 'typeorm';
-import { CreateRoleDto } from './dto/create-user-role.dto';
-import { UpdateRoleDto } from './dto/user-role.update.dto';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/role.update.dto';
 
 export class RoleRepository {
   constructor(private readonly dataSource: DataSource) {}
@@ -21,7 +20,7 @@ export class RoleRepository {
 
       SELECT @rol_id_out AS rol_id;
       `,
-      [dto.code, dto.name, dto.description ?? null, dto.isDefault ?? false, currentUserId],
+      [dto.code, dto.name, dto.description ?? null, dto.isDefault ?? false, currentUserId]
     );
 
     const row = Array.isArray(result) && result[0] ? result[0] : null;
@@ -32,11 +31,7 @@ export class RoleRepository {
     return Number(row.rol_id);
   }
 
-  async update(
-    id: number,
-    dto: UpdateRoleDto,
-    currentUserId: number,
-  ): Promise<void> {
+  async update(id: number, dto: UpdateRoleDto, currentUserId: number): Promise<void> {
     await this.dataSource.query(
       `
       EXEC dbo.usp_Role_Update
@@ -47,7 +42,7 @@ export class RoleRepository {
         @rol_is_default = @4,
         @rol_updated_by = @5;
       `,
-      [id, dto.code, dto.name, dto.description ?? null, dto.isDefault ?? false, currentUserId],
+      [id, dto.code, dto.name, dto.description ?? null, dto.isDefault ?? false, currentUserId]
     );
   }
 
@@ -55,7 +50,7 @@ export class RoleRepository {
     const rows = await this.dataSource.query(
       `
       EXEC dbo.usp_Role_ListActive;
-      `,
+      `
     );
 
     return Array.isArray(rows) ? rows : [];
@@ -68,7 +63,23 @@ export class RoleRepository {
         @rol_id        = @0,
         @rol_deleted_by = @1;
       `,
-      [id, currentUserId],
+      [id, currentUserId]
     );
+  }
+
+  async findById(id: number): Promise<any | null> {
+    const rows = await this.dataSource.query(
+      `
+      EXEC dbo.usp_Role_FindById
+        @rol_id = @0
+    `,
+      [id]
+    );
+
+    if (!rows || rows.length === 0) {
+      return null;
+    }
+
+    return rows[0];
   }
 }

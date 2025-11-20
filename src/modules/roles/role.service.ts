@@ -26,7 +26,7 @@ export class RoleService {
 
   async createRole(
     dto: CreateRoleDto,
-    currentUserId: number,
+    currentUserId: number
   ): Promise<{ message: string; roleId: number }> {
     try {
       const roleId = await this.roleRepository.create(dto, currentUserId);
@@ -50,23 +50,20 @@ export class RoleService {
         const domainError = new DomainError(
           'Ya existe un rol con ese código.',
           `Violación de índice único al crear rol. code=${dto.code}. Detalle: ${msg}`,
-          409,
+          409
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
       }
 
-      this.handleUnexpectedError(
-        'Error técnico al crear rol. SP: usp_Role_Insert',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al crear rol. SP: usp_Role_Insert', error);
     }
   }
 
   async updateRole(
     id: number,
     dto: UpdateRoleDto,
-    currentUserId: number,
+    currentUserId: number
   ): Promise<{ message: string }> {
     try {
       await this.roleRepository.update(id, dto, currentUserId);
@@ -78,14 +75,11 @@ export class RoleService {
       const err = error as any;
       const msg = typeof err?.message === 'string' ? err.message : '';
 
-      if (
-        msg.toLowerCase().includes('no existe') ||
-        msg.toLowerCase().includes('not found')
-      ) {
+      if (msg.toLowerCase().includes('no existe') || msg.toLowerCase().includes('not found')) {
         const domainError = new DomainError(
           'El rol no existe.',
           `Intento de actualizar rol inexistente. id=${id}. Detalle: ${msg}`,
-          404,
+          404
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
@@ -102,16 +96,13 @@ export class RoleService {
         const domainError = new DomainError(
           'Ya existe un rol con ese código.',
           `Violación de índice único al actualizar rol. id=${id}, code=${dto.code}. Detalle: ${msg}`,
-          409,
+          409
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
       }
 
-      this.handleUnexpectedError(
-        'Error técnico al actualizar rol. SP: usp_Role_Update',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al actualizar rol. SP: usp_Role_Update', error);
     }
   }
 
@@ -127,15 +118,12 @@ export class RoleService {
     } catch (error) {
       this.handleUnexpectedError(
         'Error técnico al listar roles activos. SP: usp_Role_ListActive',
-        error,
+        error
       );
     }
   }
 
-  async softDeleteRole(
-    id: number,
-    currentUserId: number,
-  ): Promise<{ message: string }> {
+  async softDeleteRole(id: number, currentUserId: number): Promise<{ message: string }> {
     try {
       await this.roleRepository.softDelete(id, currentUserId);
 
@@ -146,23 +134,17 @@ export class RoleService {
       const err = error as any;
       const msg = typeof err?.message === 'string' ? err.message : '';
 
-      if (
-        msg.toLowerCase().includes('no existe') ||
-        msg.toLowerCase().includes('not found')
-      ) {
+      if (msg.toLowerCase().includes('no existe') || msg.toLowerCase().includes('not found')) {
         const domainError = new DomainError(
           'El rol no existe o ya fue eliminado.',
           `Intento de eliminar rol inexistente. id=${id}. Detalle: ${msg}`,
-          404,
+          404
         );
         this.logger.error(domainError.internalMessage, (error as Error)?.stack);
         throw domainError;
       }
 
-      this.handleUnexpectedError(
-        'Error técnico al eliminar rol. SP: usp_Role_SoftDelete',
-        error,
-      );
+      this.handleUnexpectedError('Error técnico al eliminar rol. SP: usp_Role_SoftDelete', error);
     }
   }
 
@@ -188,20 +170,39 @@ export class RoleService {
   }
 
   private handleUnexpectedError(action: string, error: unknown): never {
-    const internalMessage = `${action}. Detalle: ${
-      (error as Error)?.message ?? String(error)
-    }`;
+    const internalMessage = `${action}. Detalle: ${(error as Error)?.message ?? String(error)}`;
 
-    this.logger.error(
-      internalMessage,
-      (error as Error)?.stack,
-      RoleService.name,
-    );
+    this.logger.error(internalMessage, (error as Error)?.stack, RoleService.name);
 
     throw new DomainError(
       'Ocurrió un error al procesar la solicitud. Inténtelo de nuevo más tarde.',
       internalMessage,
-      500,
+      500
     );
+  }
+
+  private handleNotFound(message: string, details?: any): never {
+    const err: any = new Error(message);
+    err.status = 404;
+    err.code = 'NOT_FOUND';
+    err.details = details;
+    throw err;
+  }
+
+  async getRoleById(id: number) {
+    try {
+      const row = await this.roleRepository.findById(id);
+
+      if (!row) {
+        this.handleNotFound(`No se encontró un rol con el identificador ${id}.`);
+      }
+
+      return this.mapDbRoleToResponse(row);
+    } catch (error) {
+      this.handleUnexpectedError(
+        `Error técnico al obtener el rol con ID ${id}. SP: usp_Role_FindById`,
+        error
+      );
+    }
   }
 }
