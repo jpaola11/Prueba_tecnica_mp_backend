@@ -7,7 +7,9 @@ export async function startServer() {
   console.log('[DB] Conectado a SQL Server');
 
   const app = buildApp(AppDataSource);
+  const expressApp = buildApp(AppDataSource);
 
+  app.use('/api', expressApp);
   setupSwagger(app);
 
   const port = Number(process.env.PORT) || 3001;

@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/user.update.dto';
 import { UserQueryDto } from './dto/query-user.dto';
 import { UserIdParamDto } from './dto/id-user.dto';
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 
 type AuthUser = {
   id: number;
@@ -21,24 +22,162 @@ export function buildUserRouter(userService: UserService): Router {
   const router = Router();
 
   /**
+ * @openapi
+ * /users/seed:
+ *   post:
+ *     summary: Crear un nuevo usuario (sin autenticación)
+ *     description: Endpoint público para crear un usuario sin requerir JWT.
+ *     tags:
+ *       - Usuarios
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateUserDto'
+ *     responses:
+ *       201:
+ *         description: Usuario creado correctamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateUserResponseDto'
+ *       400:
+ *         description: Solicitud inválida o error de validación.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GenericMessageResponseDto'
+ *       409:
+ *         description: Ya existe un usuario con ese username o email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GenericMessageResponseDto'
+ *       500:
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GenericMessageResponseDto'
+ */
+router.post(
+  '/seed/',
+  validateDto(CreateUserDto, 'body'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const dto = req.body as CreateUserDto;
+
+      // Como no hay JWT, no hay usuario autenticado.
+      const currentUserId = 0;
+
+      const result = await userService.createUser(dto, currentUserId);
+      res.status(201).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+
+  /**
+   * @openapi
+   * /users:
+   *   post:
+   *     summary: Crear un nuevo usuario
+   *     description: Crea un nuevo usuario en el sistema utilizando los datos proporcionados en la solicitud.
+   *     tags:
+   *       - Usuarios
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CreateUserDto'
+   *     responses:
+   *       201:
+   *         description: Usuario creado correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/CreateUserResponseDto'
+   *       400:
+   *         description: Solicitud inválida o error de validación.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       409:
+   *         description: Ya existe un usuario con el mismo nombre de usuario o correo electrónico.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar crear el usuario.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   */
+  router.post(
+    '/',
+    jwtAuthMiddleware,
+    validateDto(CreateUserDto, 'body'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const dto = req.body as CreateUserDto;
+        const currentUserId = Number(req.user?.id);
+        const result = await userService.createUser(dto, currentUserId);
+        res.status(201).json(result);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  /**
    * @openapi
    * /users:
    *   get:
    *     summary: Listar usuarios
+   *     description: Devuelve un listado paginado de usuarios según los filtros y parámetros de búsqueda proporcionados.
    *     tags:
    *       - Usuarios
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: query
    *         name: page
+   *         description: Número de página (1-based).
    *         schema:
    *           type: integer
    *       - in: query
    *         name: limit
+   *         description: Cantidad de registros por página.
    *         schema:
    *           type: integer
    *     responses:
    *       200:
-   *         description: Lista paginada de usuarios
+   *         description: Listado de usuarios obtenido correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/PaginatedUserResponseDto'
+   *       400:
+   *         description: Parámetros de consulta inválidos.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar listar los usuarios.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
    */
   router.get(
     '/',
@@ -59,20 +198,38 @@ export function buildUserRouter(userService: UserService): Router {
    * @openapi
    * /users/{id}:
    *   get:
-   *     summary: Obtener usuario por ID
+   *     summary: Obtener detalle de un usuario
+   *     description: Obtiene la información detallada de un usuario específico a partir de su identificador.
    *     tags:
    *       - Usuarios
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
    *         required: true
+   *         description: Identificador numérico del usuario.
    *         schema:
    *           type: integer
    *     responses:
    *       200:
-   *         description: Usuario encontrado
+   *         description: Usuario obtenido correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/UserResponseDto'
    *       404:
-   *         description: Usuario no encontrado
+   *         description: El usuario solicitado no existe.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar obtener el usuario.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
    */
   router.get(
     '/:id',
@@ -81,41 +238,8 @@ export function buildUserRouter(userService: UserService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.params as unknown as UserIdParamDto;
-        const user = await userService.getUserById(params.id);
-        res.json(user);
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
-
-  /**
-   * @openapi
-   * /users:
-   *   post:
-   *     summary: Crear usuario
-   *     tags:
-   *       - Usuarios
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/CreateUserDto'
-   *     responses:
-   *       201:
-   *         description: Usuario creado
-   */
-  router.post(
-    '/',
-    jwtAuthMiddleware,
-    validateDto(CreateUserDto, 'body'),
-    async (req: AuthRequest, res: Response, next: NextFunction) => {
-      try {
-        const body = req.body as CreateUserDto;
-        const currentUserId = req.user?.id ?? null;
-        const created = await userService.createUser(body, currentUserId!);
-        res.status(201).json(created);
+        const result = await userService.getUserById(params.id);
+        res.json(result);
       } catch (error) {
         next(error);
       }
@@ -126,13 +250,17 @@ export function buildUserRouter(userService: UserService): Router {
    * @openapi
    * /users/{id}:
    *   put:
-   *     summary: Actualizar usuario
+   *     summary: Actualizar un usuario
+   *     description: Actualiza los datos de un usuario existente utilizando la información proporcionada en la solicitud.
    *     tags:
    *       - Usuarios
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
    *         required: true
+   *         description: Identificador numérico del usuario.
    *         schema:
    *           type: integer
    *     requestBody:
@@ -143,7 +271,35 @@ export function buildUserRouter(userService: UserService): Router {
    *             $ref: '#/components/schemas/UpdateUserDto'
    *     responses:
    *       200:
-   *         description: Usuario actualizado
+   *         description: Usuario actualizado correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       400:
+   *         description: Datos de actualización inválidos.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       404:
+   *         description: El usuario a actualizar no existe.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       409:
+   *         description: Conflicto por nombre de usuario o correo duplicado.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar actualizar el usuario.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
    */
   router.put(
     '/:id',
@@ -153,10 +309,10 @@ export function buildUserRouter(userService: UserService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.params as unknown as UserIdParamDto;
-        const body = req.body as UpdateUserDto;
-        const currentUserId = req.user?.id ?? null;
-        const updated = await userService.updateUser(params.id, body, currentUserId!);
-        res.json(updated);
+        const dto = req.body as UpdateUserDto;
+        const currentUserId = Number(req.user?.id);
+        const result = await userService.updateUser(params.id, dto, currentUserId);
+        res.json(result);
       } catch (error) {
         next(error);
       }
@@ -167,18 +323,38 @@ export function buildUserRouter(userService: UserService): Router {
    * @openapi
    * /users/{id}:
    *   delete:
-   *     summary: Eliminar usuario (soft delete)
+   *     summary: Eliminar lógicamente un usuario
+   *     description: Realiza el borrado lógico de un usuario, marcándolo como eliminado sin removerlo físicamente de la base de datos.
    *     tags:
    *       - Usuarios
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
    *         required: true
+   *         description: Identificador numérico del usuario.
    *         schema:
    *           type: integer
    *     responses:
-   *       204:
-   *         description: Usuario eliminado
+   *       200:
+   *         description: Usuario eliminado correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       404:
+   *         description: El usuario no existe o ya fue eliminado previamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar eliminar el usuario.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
    */
   router.delete(
     '/:id',
@@ -187,9 +363,9 @@ export function buildUserRouter(userService: UserService): Router {
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.params as unknown as UserIdParamDto;
-        const currentUserId = req.user?.id ?? null;
-        await userService.softDeleteUser(params.id, currentUserId!);
-        res.status(204).send();
+        const currentUserId = Number(req.user?.id);
+        const result = await userService.softDeleteUser(params.id, currentUserId);
+        res.json(result);
       } catch (error) {
         next(error);
       }
