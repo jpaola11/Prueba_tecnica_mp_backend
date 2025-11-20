@@ -1,5 +1,6 @@
 import { AppDataSource } from './config/db.config';
 import { buildApp } from './app';
+import { setupSwagger } from './swagger';
 
 export async function startServer() {
   await AppDataSource.initialize();
@@ -7,13 +8,15 @@ export async function startServer() {
 
   const app = buildApp(AppDataSource);
 
+  setupSwagger(app);
+
   const port = Number(process.env.PORT) || 3001;
   app.listen(port, () => {
     console.log(`[HTTP] Server running on port ${port}`);
+    console.log(`[HTTP] Swagger disponible en http://localhost:${port}/docs`);
   });
 }
 
-// Opcional: auto-arranque si se ejecuta directamente
 if (require.main === module) {
   startServer().catch((err) => {
     console.error('[FATAL] Error al iniciar el servidor', err);
