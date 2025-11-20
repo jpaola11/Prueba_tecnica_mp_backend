@@ -1,4 +1,5 @@
-// src/modules/user/user.router.ts
+// Router
+
 import { Router, Request, Response, NextFunction } from 'express';
 import { jwtAuthMiddleware } from '../../middlewares/jwt-auth.middleware';
 import { validateDto } from '../../middlewares/validate-dto.middleware';
@@ -22,63 +23,59 @@ export function buildUserRouter(userService: UserService): Router {
   const router = Router();
 
   /**
- * @openapi
- * /users/seed:
- *   post:
- *     summary: Crear un nuevo usuario (sin autenticación)
- *     description: Endpoint público para crear un usuario sin requerir JWT.
- *     tags:
- *       - Usuarios
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CreateUserDto'
- *     responses:
- *       201:
- *         description: Usuario creado correctamente.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/CreateUserResponseDto'
- *       400:
- *         description: Solicitud inválida o error de validación.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/GenericMessageResponseDto'
- *       409:
- *         description: Ya existe un usuario con ese username o email.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/GenericMessageResponseDto'
- *       500:
- *         description: Error interno del servidor.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/GenericMessageResponseDto'
- */
-router.post(
-  '/seed/',
-  validateDto(CreateUserDto, 'body'),
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const dto = req.body as CreateUserDto;
-
-      // Como no hay JWT, no hay usuario autenticado.
-      const currentUserId = 0;
-
-      const result = await userService.createUser(dto, currentUserId);
-      res.status(201).json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
+   * @openapi
+   * /users/seed:
+   *   post:
+   *     summary: Crear un nuevo usuario (sin autenticación)
+   *     description: Endpoint público para crear un usuario sin requerir JWT. Pensado para carga inicial o ambientes controlados.
+   *     tags:
+   *       - Usuarios
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CreateUserDto'
+   *     responses:
+   *       201:
+   *         description: Usuario creado correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/CreateUserResponseDto'
+   *       400:
+   *         description: Solicitud inválida o error de validación.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       409:
+   *         description: Ya existe un usuario con ese nombre de usuario o correo electrónico.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   */
+  router.post(
+    '/seed',
+    validateDto(CreateUserDto, 'body'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const dto = req.body as CreateUserDto;
+        const currentUserId = 0;
+        const result = await userService.createUser(dto, currentUserId);
+        res.status(201).json(result);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
 
   /**
    * @openapi
@@ -135,7 +132,7 @@ router.post(
       } catch (error) {
         next(error);
       }
-    }
+    },
   );
 
   /**
@@ -149,6 +146,22 @@ router.post(
    *     security:
    *       - bearerAuth: []
    *     parameters:
+   *       - in: query
+   *         name: search
+   *         description: Texto de búsqueda para filtrar por nombre de usuario, nombre completo o correo.
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: orgUnitId
+   *         description: Identificador de la unidad organizacional a la que pertenece el usuario.
+   *         schema:
+   *           type: integer
+   *           format: int32
+   *       - in: query
+   *         name: isActive
+   *         description: Filtrar por usuarios activos o inactivos.
+   *         schema:
+   *           type: boolean
    *       - in: query
    *         name: page
    *         description: Número de página (1-based).
@@ -191,7 +204,7 @@ router.post(
       } catch (error) {
         next(error);
       }
-    }
+    },
   );
 
   /**
@@ -211,6 +224,7 @@ router.post(
    *         description: Identificador numérico del usuario.
    *         schema:
    *           type: integer
+   *           format: int32
    *     responses:
    *       200:
    *         description: Usuario obtenido correctamente.
@@ -243,7 +257,7 @@ router.post(
       } catch (error) {
         next(error);
       }
-    }
+    },
   );
 
   /**
@@ -263,6 +277,7 @@ router.post(
    *         description: Identificador numérico del usuario.
    *         schema:
    *           type: integer
+   *           format: int32
    *     requestBody:
    *       required: true
    *       content:
@@ -277,7 +292,7 @@ router.post(
    *             schema:
    *               $ref: '#/components/schemas/GenericMessageResponseDto'
    *       400:
-   *         description: Datos de actualización inválidos.
+   *         description: Solicitud inválida, datos de actualización incorrectos o usuario eliminado previamente.
    *         content:
    *           application/json:
    *             schema:
@@ -289,7 +304,7 @@ router.post(
    *             schema:
    *               $ref: '#/components/schemas/GenericMessageResponseDto'
    *       409:
-   *         description: Conflicto por nombre de usuario o correo duplicado.
+   *         description: Ya existe un usuario con el mismo nombre de usuario o correo electrónico.
    *         content:
    *           application/json:
    *             schema:
@@ -316,7 +331,79 @@ router.post(
       } catch (error) {
         next(error);
       }
-    }
+    },
+  );
+
+  /**
+   * @openapi
+   * /users/{id}/password:
+   *   patch:
+   *     summary: Actualizar la contraseña de un usuario
+   *     description: Actualiza la contraseña de un usuario validando la contraseña actual y la confirmación de la nueva contraseña.
+   *     tags:
+   *       - Usuarios
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: Identificador numérico del usuario.
+   *         schema:
+   *           type: integer
+   *           format: int32
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UpdateUserPasswordDto'
+   *     responses:
+   *       200:
+   *         description: Contraseña actualizada correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       400:
+   *         description: La contraseña actual es incorrecta o la confirmación de la nueva contraseña no coincide.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       404:
+   *         description: El usuario no existe.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *       500:
+   *         description: Error interno del servidor al intentar actualizar la contraseña del usuario.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   */
+  router.patch(
+    '/:id/password',
+    jwtAuthMiddleware,
+    validateDto(UserIdParamDto, 'params'),
+    validateDto(UpdateUserPasswordDto, 'body'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const params = req.params as unknown as UserIdParamDto;
+        const dto = req.body as UpdateUserPasswordDto;
+        const currentUserId = Number(req.user?.id);
+        const result = await userService.updateUserPassword(
+          params.id,
+          dto,
+          currentUserId,
+        );
+        res.json(result);
+      } catch (error) {
+        next(error);
+      }
+    },
   );
 
   /**
@@ -336,6 +423,7 @@ router.post(
    *         description: Identificador numérico del usuario.
    *         schema:
    *           type: integer
+   *           format: int32
    *     responses:
    *       200:
    *         description: Usuario eliminado correctamente.
@@ -369,7 +457,7 @@ router.post(
       } catch (error) {
         next(error);
       }
-    }
+    },
   );
 
   return router;
