@@ -66,14 +66,16 @@ export class CaseFileRepository {
         @cas_description       = @2,
         @cas_org_unit_id       = @3,
         @cas_reference_external= @4,
-        @cas_updated_by        = @5;
+        @new_status_id =@5
+        @cas_updated_by        = @6;
       `,
       [
         id,
-        dto.title,
+        dto.title ?? null,
         dto.description ?? null,
         dto.orgUnitId ?? null,
         dto.referenceExternal ?? null,
+        dto.statusId ??null,
         currentUserId,
       ],
     );

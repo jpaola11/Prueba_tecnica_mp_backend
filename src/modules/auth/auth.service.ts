@@ -20,6 +20,7 @@ interface AuthUserDto {
   email: string | null;
   username: string | null;
   name: string | null;
+  role: string;
   roles: AuthUserRoleDto[];
 }
 
@@ -95,11 +96,16 @@ export class AuthService {
   }
 
   private mapAuthUser(user: User, roles: Role[]): AuthUserDto {
+    let nameRole = '';
+    if(roles.length > 0){
+      nameRole = roles[0].name;
+    }
     return {
       id: user.id,
       email: ((user as any).email ?? null) as string | null,
       username: ((user as any).username ?? null) as string | null,
-      name: ((user as any).name ?? null) as string | null,
+      name: ((user as any).username ?? null) as string | null,
+      role: nameRole,
       roles: roles.map((r) => ({
         id: r.id,
         code: r.code,
@@ -134,7 +140,7 @@ export class AuthService {
     if (!isValid) {
       throw new UnauthorizedException('CREDENCIALES_INVALIDAS');
     }
-
+    console.log(user)
     const userRoles = ((user as any).userRoles || []) as UserRole[];
     const roles: Role[] = userRoles.map((ur) => ur.role).filter((r): r is Role => !!r);
 

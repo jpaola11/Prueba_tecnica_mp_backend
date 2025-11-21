@@ -3,16 +3,7 @@ import { IsInt, IsString, IsOptional, IsDateString, Length } from 'class-validat
 import { Transform } from 'class-transformer';
 
 export class ChangeCaseStatusDto {
-  @ApiProperty({
-    name: 'caseId',
-    description: 'Identificador del expediente al que se le cambiará el estado',
-    example: 120,
-    default: null,
-    type: Number,
-  })
-  @IsInt()
-  @Transform(({ value }) => Number(value))
-  caseId!: number;
+ 
 
   @ApiProperty({
     name: 'statusId',
