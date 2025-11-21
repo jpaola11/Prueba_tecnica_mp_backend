@@ -299,8 +299,6 @@ export function buildRoleRouter(roleService: RoleService): Router {
     }
   );
 
-  return router;
-
   /**
  * @openapi
  * /roles/{id}:
@@ -326,20 +324,21 @@ export function buildRoleRouter(roleService: RoleService): Router {
  *       500:
  *         description: Error interno.
  */
-router.get(
-  '/:id',
-  jwtAuthMiddleware,
-  validateDto(RoleIdParamDto, 'params'),
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const params = req.params as unknown as RoleIdParamDto;
-      const role = await roleService.findOne(params.id);
-      res.json(role);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
+  router.get(
+    '/:id',
+    jwtAuthMiddleware,
+    validateDto(RoleIdParamDto, 'params'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const params = req.params as unknown as RoleIdParamDto;
+        const role = await roleService.findOne(params.id);
+        res.json(role);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+    
+  return router;
 
 }

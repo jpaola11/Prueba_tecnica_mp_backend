@@ -388,9 +388,7 @@ export function buildUserRouter(userService: UserService): Router {
     },
   );
 
-  return router;
-
-  /**
+    /**
  * @openapi
  * /users/{id}:
  *   get:
@@ -429,6 +427,10 @@ router.get(
     }
   },
 );
+
+  return router;
+
+
 
 
 }

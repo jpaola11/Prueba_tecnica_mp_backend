@@ -253,7 +253,6 @@ export function buildEvidenceRouter(evidenceService: EvidenceService): Router {
     },
   );
 
-  return router;
 
   /**
  * @openapi
@@ -295,5 +294,9 @@ router.get(
   },
 );
 
+
+  return router;
+
+  
 
 }

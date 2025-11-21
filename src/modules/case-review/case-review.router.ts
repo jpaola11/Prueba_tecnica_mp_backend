@@ -140,9 +140,7 @@ export function buildCaseReviewRouter(
     },
   );
 
-  return router;
-
-
+  
   /**
  * @openapi
  * /cases-review/{id}:
@@ -183,5 +181,6 @@ router.get(
   },
 );
 
+  return router;
 
 }

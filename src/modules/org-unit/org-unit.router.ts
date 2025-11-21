@@ -312,8 +312,8 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
     },
   );
 
-  return router;
 
+  
   /**
  * @openapi
  * /org-unit/{id}:
@@ -353,6 +353,9 @@ router.get(
     }
   },
 );
+
+  return router;
+
 
 
 }
