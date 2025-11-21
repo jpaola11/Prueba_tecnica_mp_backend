@@ -32,7 +32,7 @@ export class EvidenceRepository {
       `,
       [
         dto.caseId,
-        dto.sequenceNumber,
+        dto.seqNumber,
         dto.description,
         dto.color ?? null,
         dto.sizeText ?? null,
@@ -76,7 +76,7 @@ export class EvidenceRepository {
       `,
       [
         id,
-        dto.sequenceNumber,
+        dto.seqNumber,
         dto.description,
         dto.color ?? null,
         dto.sizeText ?? null,
