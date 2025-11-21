@@ -295,6 +295,7 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
     jwtAuthMiddleware,
     validateDto(CaseFileIdParamDto, 'params'),
     validateDto(ChangeCaseStatusDto, 'body'),
+    
     async (req: AuthRequest, res: Response, next: NextFunction) => {
       try {
         const params = req.params as unknown as CaseFileIdParamDto;

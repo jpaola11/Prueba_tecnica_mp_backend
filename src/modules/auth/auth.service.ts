@@ -134,7 +134,7 @@ export class AuthService {
     if (!isValid) {
       throw new UnauthorizedException('CREDENCIALES_INVALIDAS');
     }
-
+    console.log(user)
     const userRoles = ((user as any).userRoles || []) as UserRole[];
     const roles: Role[] = userRoles.map((ur) => ur.role).filter((r): r is Role => !!r);
 
