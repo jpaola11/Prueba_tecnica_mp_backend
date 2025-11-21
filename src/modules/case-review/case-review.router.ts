@@ -1,5 +1,3 @@
-// Router
-
 import { Router, Request, Response, NextFunction } from 'express';
 import { jwtAuthMiddleware } from '../../middlewares/jwt-auth.middleware';
 import { validateDto } from '../../middlewares/validate-dto.middleware';
@@ -26,37 +24,26 @@ export function buildCaseReviewRouter(
    * @openapi
    * /case-reviews:
    *   get:
-   *     summary: Listar revisiones de un expediente
-   *     description: Devuelve un listado paginado de revisiones asociadas a un expediente específico, identificado por su caseId.
+   *     summary: Listar revisiones de expedientes
+   *     description: Devuelve un listado paginado y filtrado de revisiones de expedientes.
    *     tags:
    *       - Revisiones de expedientes
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: caseId
+   *       - in: query
+   *         name: reviewerId
+   *       - in: query
+   *         name: previousStatusId
+   *       - in: query
+   *         name: newStatusId
+   *       - in: query
+   *         name: search
    *     responses:
    *       200:
-   *         description: Listado de revisiones del expediente obtenido correctamente.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/PaginatedCaseReviewResponseDto'
-   *       400:
-   *         description: Parámetros de consulta inválidos o falta el identificador del expediente.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
-   *       404:
-   *         description: No se encontraron revisiones para el expediente especificado o el expediente no existe.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
-   *       500:
-   *         description: Error interno del servidor al intentar listar las revisiones del expediente.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *         description: Listado obtenido correctamente.
    */
   router.get(
     '/',
@@ -78,7 +65,7 @@ export function buildCaseReviewRouter(
    * /case-reviews:
    *   post:
    *     summary: Registrar una revisión de expediente
-   *     description: Registra una nueva revisión de un expediente, almacenando el cambio de estado, comentario y datos del revisor.
+   *     description: Registra un cambio de estado, comentario y datos del revisor.
    *     tags:
    *       - Revisiones de expedientes
    *     security:
@@ -91,35 +78,7 @@ export function buildCaseReviewRouter(
    *             $ref: '#/components/schemas/CreateCaseReviewDto'
    *     responses:
    *       201:
-   *         description: Revisión registrada correctamente.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/CreateCaseReviewResponseDto'
-   *       400:
-   *         description: Solicitud inválida o error de validación en los datos de la revisión.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
-   *       404:
-   *         description: El expediente asociado a la revisión no existe.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
-   *       409:
-   *         description: El nuevo estado es igual al estado anterior o la operación entra en conflicto con el estado actual.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
-   *       500:
-   *         description: Error interno del servidor al intentar registrar la revisión.
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/GenericMessageResponseDto'
+   *         description: Revisión creada correctamente.
    */
   router.post(
     '/',
@@ -129,10 +88,7 @@ export function buildCaseReviewRouter(
       try {
         const dto = req.body as CreateCaseReviewDto;
         const currentUserId = Number(req.user?.id);
-        const result = await caseReviewService.registerReview(
-          dto,
-          currentUserId,
-        );
+        const result = await caseReviewService.registerReview(dto, currentUserId);
         res.status(201).json(result);
       } catch (error) {
         next(error);
@@ -140,47 +96,41 @@ export function buildCaseReviewRouter(
     },
   );
 
-  
   /**
- * @openapi
- * /cases-review/{id}:
- *   get:
- *     summary: Obtener detalle de una revisión de expediente
- *     description: Devuelve la revisión específica realizada a un expediente.
- *     tags:
- *       - Revisiones de expediente
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: Identificador de la revisión.
- *     responses:
- *       200:
- *         description: Revisión obtenida correctamente.
- *       400:
- *         description: Parámetro inválido.
- *       404:
- *         description: Revisión no encontrada.
- *       500:
- *         description: Error interno.
- */
-router.get(
-  '/:id',
-  jwtAuthMiddleware,
-  validateDto(CaseReviewIdParamDto, 'params'),
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const params = req.params as unknown as CaseReviewIdParamDto;
-      const review = await caseReviewService.findOne(params.id);
-      res.json(review);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
+   * @openapi
+   * /case-reviews/{id}:
+   *   get:
+   *     summary: Obtener detalle de una revisión de expediente
+   *     description: Devuelve una revisión específica.
+   *     tags:
+   *       - Revisiones de expedientes
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         description: Identificador de la revisión.
+   *     responses:
+   *       200:
+   *         description: Revisión obtenida correctamente.
+   *       404:
+   *         description: Revisión no encontrada.
+   */
+  router.get(
+    '/:id',
+    jwtAuthMiddleware,
+    validateDto(CaseReviewIdParamDto, 'params'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const params = req.params as unknown as CaseReviewIdParamDto;
+        const review = await caseReviewService.findOne(params.id);
+        res.json(review);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
 
   return router;
-
 }
