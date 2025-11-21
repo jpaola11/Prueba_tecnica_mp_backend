@@ -64,7 +64,7 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -117,7 +117,7 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -169,7 +169,7 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -232,16 +232,12 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
         const params = req.params as unknown as CaseFileIdParamDto;
         const dto = req.body as UpdateCaseFileDto;
         const currentUserId = Number(req.user?.id);
-        const result = await caseFileService.updateCase(
-          params.id,
-          dto,
-          currentUserId,
-        );
+        const result = await caseFileService.updateCase(params.id, dto, currentUserId);
         res.json(result);
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -304,16 +300,12 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
         const params = req.params as unknown as CaseFileIdParamDto;
         const dto = req.body as ChangeCaseStatusDto;
         const currentUserId = Number(req.user?.id);
-        const result = await caseFileService.changeStatus(
-          params.id,
-          dto,
-          currentUserId,
-        );
+        const result = await caseFileService.changeStatus(params.id, dto, currentUserId);
         res.json(result);
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -368,65 +360,60 @@ export function buildCaseFileRouter(caseFileService: CaseFileService): Router {
       try {
         const params = req.params as unknown as CaseFileIdParamDto;
         const currentUserId = Number(req.user?.id);
-        const result = await caseFileService.softDeleteCase(
-          params.id,
-          currentUserId,
-        );
+        const result = await caseFileService.softDeleteCase(params.id, currentUserId);
         res.json(result);
       } catch (error) {
         next(error);
       }
-    },
+    }
+  );
+
+  /**
+   * @openapi
+   * /case-file/{id}:
+   *   get:
+   *     summary: Obtener detalle de un expediente
+   *     description: Devuelve el detalle de un expediente identificado por su identificador numérico.
+   *     tags:
+   *       - Expedientes
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: Identificador numérico del expediente.
+   *         schema:
+   *           type: integer
+   *           format: int32
+   *     responses:
+   *       200:
+   *         description: Expediente obtenido correctamente.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/CaseFileResponseDto'
+   *       400:
+   *         description: Parámetro de ruta inválido.
+   *       404:
+   *         description: El expediente no existe.
+   *       500:
+   *         description: Error interno del servidor.
+   */
+  router.get(
+    '/:id',
+    jwtAuthMiddleware,
+    validateDto(CaseFileIdParamDto, 'params'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const params = req.params as unknown as CaseFileIdParamDto;
+        const file = await caseFileService.findOne(params.id);
+        res.json(file);
+      } catch (error) {
+        next(error);
+      }
+    }
   );
 
   return router;
-  
-  /**
- * @openapi
- * /case-file/{id}:
- *   get:
- *     summary: Obtener detalle de un expediente
- *     description: Devuelve el detalle de un expediente identificado por su identificador numérico.
- *     tags:
- *       - Expedientes
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: Identificador numérico del expediente.
- *         schema:
- *           type: integer
- *           format: int32
- *     responses:
- *       200:
- *         description: Expediente obtenido correctamente.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/CaseFileResponseDto'
- *       400:
- *         description: Parámetro de ruta inválido.
- *       404:
- *         description: El expediente no existe.
- *       500:
- *         description: Error interno del servidor.
- */
-router.get(
-  '/:id',
-  jwtAuthMiddleware,
-  validateDto(CaseFileIdParamDto, 'params'),
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const params = req.params as unknown as CaseFileIdParamDto;
-      const file = await caseFileService.findOne(params.id);
-      res.json(file);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-  
 }

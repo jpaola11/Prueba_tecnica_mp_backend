@@ -16,9 +16,7 @@ interface AuthRequest extends Request {
   user?: AuthUser;
 }
 
-export function buildCaseStatusRouter(
-  caseStatusService: CaseStatusService,
-): Router {
+export function buildCaseStatusRouter(caseStatusService: CaseStatusService): Router {
   const router = Router();
 
   /**
@@ -57,7 +55,7 @@ export function buildCaseStatusRouter(
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -115,7 +113,7 @@ export function buildCaseStatusRouter(
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -178,16 +176,12 @@ export function buildCaseStatusRouter(
         const params = req.params as unknown as CaseStatusIdParamDto;
         const dto = req.body as UpdateCaseStatusDto;
         const currentUserId = Number(req.user?.id);
-        const result = await caseStatusService.updateStatus(
-          params.id,
-          dto,
-          currentUserId,
-        );
+        const result = await caseStatusService.updateStatus(params.id, dto, currentUserId);
         res.json(result);
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
   /**
@@ -242,56 +236,53 @@ export function buildCaseStatusRouter(
       try {
         const params = req.params as unknown as CaseStatusIdParamDto;
         const currentUserId = Number(req.user?.id);
-        const result = await caseStatusService.softDeleteStatus(
-          params.id,
-          currentUserId,
-        );
+        const result = await caseStatusService.softDeleteStatus(params.id, currentUserId);
         res.json(result);
       } catch (error) {
         next(error);
       }
-    },
+    }
   );
 
-/**
- * @openapi
- * /case-status/{id}:
- *   get:
- *     summary: Obtener detalle de un estado de expediente
- *     description: Devuelve la información completa de un estado de expediente.
- *     tags:
- *       - Estados de expediente
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: Identificador del estado.
- *     responses:
- *       200:
- *         description: Estado obtenido correctamente.
- *       400:
- *         description: Parámetro inválido.
- *       404:
- *         description: Estado no encontrado.
- *       500:
- *         description: Error interno.
- */
-router.get(
-  '/:id',
-  jwtAuthMiddleware,
-  validateDto(CaseStatusIdParamDto, 'params'),
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const params = req.params as unknown as CaseStatusIdParamDto;
-      const status = await caseStatusService.findOne(params.id);
-      res.json(status);
-    } catch (error) {
-      next(error);
+  /**
+   * @openapi
+   * /case-status/{id}:
+   *   get:
+   *     summary: Obtener detalle de un estado de expediente
+   *     description: Devuelve la información completa de un estado de expediente.
+   *     tags:
+   *       - Estados de expediente
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: Identificador del estado.
+   *     responses:
+   *       200:
+   *         description: Estado obtenido correctamente.
+   *       400:
+   *         description: Parámetro inválido.
+   *       404:
+   *         description: Estado no encontrado.
+   *       500:
+   *         description: Error interno.
+   */
+  router.get(
+    '/:id',
+    jwtAuthMiddleware,
+    validateDto(CaseStatusIdParamDto, 'params'),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const params = req.params as unknown as CaseStatusIdParamDto;
+        const status = await caseStatusService.findOne(params.id);
+        res.json(status);
+      } catch (error) {
+        next(error);
+      }
     }
-  },
-);
+  );
 
-  
+  return router;
 }
