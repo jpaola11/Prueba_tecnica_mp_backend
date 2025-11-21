@@ -1,35 +1,42 @@
-import express from 'express';
-import helmet from 'helmet';
+import { AppDataSource } from './config/db.config';
+import { buildApp } from './app';
+import { setupSwagger } from './swagger';
 import cors from 'cors';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
-import { router } from './core/http/routes';
+import express, { Application } from 'express';
 
-export async function startServer(): Promise<void> {
-  dotenv.config();
-
+export async function startServer() {
+  await AppDataSource.initialize();
+  console.log('[DB] Conectado a SQL Server');
   const app = express();
 
-  app.use(helmet());
-  app.use(cors());
-  app.use(express.json({ limit: '10mb' }));
-  app.use(morgan('combined'));
-
   app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 100,
-      standardHeaders: true,
-      legacyHeaders: false,
-    }),
+    cors({
+      origin: ['http://localhost:5173', 'http://localhost:3001'],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+      exposedHeaders: ['Authorization'],
+    })
   );
 
-  app.use('/api', router);
+  app.use(express.json());
+
+  const expressApp = buildApp(AppDataSource);
+
+  app.use('/api', expressApp);
+
+  setupSwagger(app);
 
   const port = Number(process.env.PORT) || 3001;
   app.listen(port, () => {
-    console.log(`API running on port ${port}`);
-    console.log(`Healthcheck → http://localhost:${port}/api/health`);
+    console.log(`[HTTP] Server running on port ${port}`);
+    console.log(`[HTTP] Swagger disponible en http://localhost:${port}/docs`);
+  });
+}
+
+if (require.main === module) {
+  startServer().catch((err) => {
+    console.error('[FATAL] Error al iniciar el servidor', err);
+    process.exit(1);
   });
 }
