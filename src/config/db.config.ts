@@ -14,7 +14,7 @@ export const AppDataSource = new DataSource({
   type: 'mssql',
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT) || 1433,
-  username: 'admin',
+  username: 'sa',
   password: 'Admin!123',
   database: process.env.DB_NAME || 'Pruebamp',
   synchronize: false,
