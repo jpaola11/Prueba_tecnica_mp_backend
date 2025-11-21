@@ -2197,3 +2197,134 @@
  *         - tokenType
  *         - expiresIn
  */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     CaseStatusSummaryRowDto:
+ *       type: object
+ *       description: Fila del resumen agrupado de expedientes por unidad organizacional.
+ *       properties:
+ *         orgUnitId:
+ *           type: integer
+ *           format: int32
+ *           nullable: true
+ *           description: Identificador de la unidad organizacional.
+ *           example: 5
+ *         orgUnitName:
+ *           type: string
+ *           description: Nombre descriptivo de la unidad organizacional.
+ *           example: "Fiscalía de Delitos Económicos"
+ *         open:
+ *           type: integer
+ *           format: int32
+ *           description: Cantidad de expedientes en estado Abierto (statusId = 0).
+ *           example: 12
+ *         inProgress:
+ *           type: integer
+ *           format: int32
+ *           description: Cantidad de expedientes En trámite (statusId = 1).
+ *           example: 7
+ *         closed:
+ *           type: integer
+ *           format: int32
+ *           description: Cantidad de expedientes Cerrados (statusId = 2 o 3).
+ *           example: 3
+ *         total:
+ *           type: integer
+ *           format: int32
+ *           description: Total de expedientes para esa unidad.
+ *           example: 22
+ *       required:
+ *         - orgUnitName
+ *         - open
+ *         - inProgress
+ *         - closed
+ *         - total
+ */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     CaseStatusSummaryQueryDto:
+ *       type: object
+ *       description: Parámetros de consulta para generar el resumen de expedientes.
+ *       properties:
+ *         orgUnitId:
+ *           type: integer
+ *           format: int32
+ *           nullable: true
+ *           description: Filtra los resultados por unidad organizacional.
+ *           example: 5
+ *         status:
+ *           type: string
+ *           nullable: true
+ *           description: |
+ *             Grupo de estado:
+ *               - OPEN: expedientes abiertos.
+ *               - IN_PROGRESS: expedientes en trámite.
+ *               - CLOSED: expedientes cerrados (aprobados o rechazados).
+ *           enum: [OPEN, IN_PROGRESS, CLOSED]
+ *           example: "IN_PROGRESS"
+ *         fromDate:
+ *           type: string
+ *           format: date
+ *           nullable: true
+ *           description: Fecha inicial (YYYY-MM-DD) para filtrar por fecha de apertura.
+ *           example: "2025-11-01"
+ *         toDate:
+ *           type: string
+ *           format: date
+ *           nullable: true
+ *           description: Fecha final (YYYY-MM-DD) para filtrar por fecha de apertura.
+ *           example: "2025-11-30"
+ */
+
+/**
+ * @openapi
+ * /reports/case-status-summary:
+ *   get:
+ *     summary: Resumen de expedientes por unidad y estado
+ *     description: Obtiene un resumen consolidado de expedientes agrupados por unidad y estado.
+ *     tags:
+ *       - Reportes
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: orgUnitId
+ *         schema:
+ *           type: integer
+ *         description: Unidad organizacional a filtrar.
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [OPEN, IN_PROGRESS, CLOSED]
+ *         description: Grupo de estado por el que se filtrará.
+ *       - in: query
+ *         name: fromDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: toDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Resumen generado exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CaseStatusSummaryRowDto'
+ *       400:
+ *         description: Parámetros inválidos.
+ *       500:
+ *         description: Error interno al generar el resumen.
+ */

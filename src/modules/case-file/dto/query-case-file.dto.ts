@@ -104,4 +104,28 @@ export class CaseFileQueryDto extends IntersectionType(CaseFileQueryBaseDto, Onl
   @IsOptional()
   @IsDateString()
   openDate?: string;
+
+  @ApiPropertyOptional({
+    name: 'fromDate',
+    description:
+      'Fecha de apertura en formato ISO 8601. Si se omite, el servidor asigna la fecha actual',
+    example: '2025-11-18T10:30:00Z',
+    default: null,
+    type: String,
+  })
+  @IsOptional()
+  @IsDateString()
+  fromDate?: string;
+
+  @ApiPropertyOptional({
+    name: 'toDate',
+    description:
+      'Fecha de apertura en formato ISO 8601. Si se omite, el servidor asigna la fecha actual',
+    example: '2025-11-18T10:30:00Z',
+    default: null,
+    type: String,
+  })
+  @IsOptional()
+  @IsDateString()
+  toDate?: string;
 }

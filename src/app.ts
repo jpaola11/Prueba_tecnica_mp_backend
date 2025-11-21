@@ -10,6 +10,8 @@ import { buildCaseFileModule } from './modules/case-file/case-file.module';
 import { buildEvidenceModule } from './modules/evidence/evidence.module';
 import { buildCaseReviewModule } from './modules/case-review/case-review.module';
 import { buildAuthModule } from './modules/auth/auth.module';
+import { report } from 'process';
+import { buildReportsModule } from './modules/reports/reports.module';
 
 export function buildApp(dataSource: DataSource): Application {
   const app = express();
@@ -56,6 +58,11 @@ export function buildApp(dataSource: DataSource): Application {
     auditLogService: auditLogModule.service,
   });
 
+  const reportsModule = buildReportsModule({
+    dataSource,
+    auditLogService: auditLogModule.service,
+  });
+
   // 3) Montar routers
   app.use('/auth', authModule.router);
   app.use('/audit-logs', auditLogModule.router);
@@ -66,6 +73,7 @@ export function buildApp(dataSource: DataSource): Application {
   app.use('/case-files', caseFileModule.router);
   app.use('/evidences', evidenceModule.router);
   app.use('/case-reviews', caseReviewModule.router);
+  app.use('/reports', reportsModule.router);
 
   return app;
 }

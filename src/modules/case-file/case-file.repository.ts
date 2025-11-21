@@ -8,10 +8,7 @@ import { ChangeCaseStatusDto } from './dto/change-case-status.dto';
 export class CaseFileRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async insert(
-    dto: CreateCaseFileDto,
-    currentUserId: number,
-  ): Promise<number> {
+  async insert(dto: CreateCaseFileDto, currentUserId: number): Promise<number> {
     const result = await this.dataSource.query(
       `
       DECLARE @cas_id_out INT;
@@ -40,24 +37,18 @@ export class CaseFileRepository {
         dto.openDate ?? null,
         dto.referenceExternal ?? null,
         currentUserId,
-      ],
+      ]
     );
 
     const row = Array.isArray(result) && result[0] ? result[0] : null;
     if (!row || row.cas_id == null) {
-      throw new Error(
-        'La ejecución de usp_CaseFile_Insert no devolvió cas_id.',
-      );
+      throw new Error('La ejecución de usp_CaseFile_Insert no devolvió cas_id.');
     }
 
     return Number(row.cas_id);
   }
 
-  async update(
-    id: number,
-    dto: UpdateCaseFileDto,
-    currentUserId: number,
-  ): Promise<void> {
+  async update(id: number, dto: UpdateCaseFileDto, currentUserId: number): Promise<void> {
     await this.dataSource.query(
       `
       EXEC dbo.usp_CaseFile_Update
@@ -75,17 +66,13 @@ export class CaseFileRepository {
         dto.description ?? null,
         dto.orgUnitId ?? null,
         dto.referenceExternal ?? null,
-        dto.statusId ??null,
+        dto.statusId ?? null,
         currentUserId,
-      ],
+      ]
     );
   }
 
-  async updateStatus(
-    id: number,
-    dto: ChangeCaseStatusDto,
-    currentUserId: number,
-  ): Promise<void> {
+  async updateStatus(id: number, dto: ChangeCaseStatusDto, currentUserId: number): Promise<void> {
     await this.dataSource.query(
       `
       EXEC dbo.usp_CaseFile_UpdateStatus
@@ -93,7 +80,7 @@ export class CaseFileRepository {
         @new_status_id = @1,
         @cas_updated_by= @2;
       `,
-      [id, dto.statusId, currentUserId],
+      [id, dto.statusId, currentUserId]
     );
   }
 
@@ -103,7 +90,7 @@ export class CaseFileRepository {
       EXEC dbo.usp_CaseFile_GetById
         @cas_id = @0;
       `,
-      [id],
+      [id]
     );
 
     return Array.isArray(rows) && rows[0] ? rows[0] : null;
@@ -117,16 +104,50 @@ export class CaseFileRepository {
         @cas_status_id   = @1,
         @cas_org_unit_id = @2,
         @date_from       = @3;
-      `,
+    `,
       [
         query.code ?? null,
         query.statusId ?? null,
         query.orgUnitId ?? null,
-        query.openDate ?? null,
-      ],
+        query.openDate ?? null, // esto sigue siendo el filtro del SP por openDate
+      ]
     );
 
-    return Array.isArray(rows) ? rows : [];
+    let result = Array.isArray(rows) ? rows : [];
+
+    const fromDate = (query as any).fromDate as string | undefined;
+    const toDate = (query as any).toDate as string | undefined;
+
+    if (fromDate || toDate) {
+      let from: Date | null = null;
+      let to: Date | null = null;
+
+      if (fromDate) {
+        from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+      }
+
+      if (toDate) {
+        to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+      }
+
+      result = result.filter((row) => {
+        const rawCreated = row.cas_created_at ?? row.createdAt ?? null;
+
+        if (!rawCreated) return false;
+
+        const created = rawCreated instanceof Date ? rawCreated : new Date(rawCreated);
+        if (Number.isNaN(created.getTime())) return false;
+
+        if (from && created < from) return false;
+        if (to && created > to) return false;
+
+        return true;
+      });
+    }
+
+    return result;
   }
 
   async softDelete(id: number, currentUserId: number): Promise<void> {
@@ -136,7 +157,7 @@ export class CaseFileRepository {
         @cas_id        = @0,
         @cas_deleted_by= @1;
       `,
-      [id, currentUserId],
+      [id, currentUserId]
     );
   }
 
@@ -150,11 +171,4 @@ export class CaseFileRepository {
     );
     return rows[0] ?? null;
   }
-  
-
- 
-  
 }
-
-
-
