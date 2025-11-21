@@ -26,8 +26,8 @@ import {
     @Column({ name: 'cst_is_final', type: 'bit', default: false })
     isFinal: boolean;
   
-    @Column({ name: 'cst_order', type: 'int' })
-    order: number;
+    @Column({ name: 'cst_order', type: 'int',nullable: true  })
+    order?: number;
   
     // Auditoría / soft delete
     @Column({ name: 'cst_created_at', type: 'datetime2' })

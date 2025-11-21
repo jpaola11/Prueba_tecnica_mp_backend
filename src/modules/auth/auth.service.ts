@@ -81,7 +81,7 @@ export class AuthService {
     const rawExpires = process.env.JWT_ACCESS_EXPIRES_IN;
     let expiresInValue: number | string | undefined;
     if (rawExpires == null) {
-      expiresInValue = '15m';
+      expiresInValue = '60m';
     } else {
       const parsed = Number(rawExpires);
       expiresInValue = !Number.isNaN(parsed) && /^\d+$/.test(rawExpires) ? parsed : rawExpires;

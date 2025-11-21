@@ -80,8 +80,9 @@ export class CreateCaseStatusDto {
     default: 1,
     type: Number,
   })
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Transform(({ value }) => Number(value))
-  order!: number;
+  order?: number;
 }

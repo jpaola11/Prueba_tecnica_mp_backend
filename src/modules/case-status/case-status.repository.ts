@@ -29,7 +29,7 @@ export class CaseStatusRepository {
         dto.name,
         dto.description ?? null,
         dto.isFinal ?? false,
-        dto.order,
+        dto.order ?? null,
         currentUserId,
       ],
     );
