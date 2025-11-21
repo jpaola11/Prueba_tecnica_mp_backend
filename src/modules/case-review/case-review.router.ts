@@ -6,6 +6,7 @@ import { validateDto } from '../../middlewares/validate-dto.middleware';
 import { CaseReviewService } from './case-review.service';
 import { CreateCaseReviewDto } from './dto/create-case-review.dto';
 import { CaseReviewQueryDto } from './dto/query-case-rewiew.dto';
+import { CaseReviewIdParamDto } from './dto/id-case-review.dto';
 
 type AuthUser = {
   id: number;
@@ -140,4 +141,47 @@ export function buildCaseReviewRouter(
   );
 
   return router;
+
+
+  /**
+ * @openapi
+ * /cases-review/{id}:
+ *   get:
+ *     summary: Obtener detalle de una revisión de expediente
+ *     description: Devuelve la revisión específica realizada a un expediente.
+ *     tags:
+ *       - Revisiones de expediente
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Identificador de la revisión.
+ *     responses:
+ *       200:
+ *         description: Revisión obtenida correctamente.
+ *       400:
+ *         description: Parámetro inválido.
+ *       404:
+ *         description: Revisión no encontrada.
+ *       500:
+ *         description: Error interno.
+ */
+router.get(
+  '/:id',
+  jwtAuthMiddleware,
+  validateDto(CaseReviewIdParamDto, 'params'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const params = req.params as unknown as CaseReviewIdParamDto;
+      const review = await caseReviewService.findOne(params.id);
+      res.json(review);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+
 }

@@ -269,4 +269,19 @@ export class OrgUnitService {
       500,
     );
   }
+
+  async findOne(id: number) {
+    try {
+      return await this.orgUnitRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener la unidad organizacional con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+  
+      this.logger.error(internalMessage, (error as Error)?.stack, OrgUnitService.name);
+  
+      throw error;
+    }
+  }
+  
 }

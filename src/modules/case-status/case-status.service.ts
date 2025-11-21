@@ -181,4 +181,20 @@ export class CaseStatusService {
       500,
     );
   }
+
+  async findOne(id: number) {
+    try {
+      return await this.caseStatusRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener el estado del expediente con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+  
+      this.logger.error(internalMessage, (error as Error)?.stack, CaseStatusService.name);
+  
+      throw error;
+    }
+  }
+
+  
 }

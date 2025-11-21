@@ -254,4 +254,46 @@ export function buildEvidenceRouter(evidenceService: EvidenceService): Router {
   );
 
   return router;
+
+  /**
+ * @openapi
+ * /evidence/{id}:
+ *   get:
+ *     summary: Obtener detalle de una evidencia
+ *     description: Retorna la información completa de una evidencia asociada a un expediente.
+ *     tags:
+ *       - Evidencias
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Identificador de la evidencia.
+ *     responses:
+ *       200:
+ *         description: Evidencia obtenida correctamente.
+ *       400:
+ *         description: Parámetro inválido.
+ *       404:
+ *         description: Evidencia no encontrada.
+ *       500:
+ *         description: Error interno.
+ */
+router.get(
+  '/:id',
+  jwtAuthMiddleware,
+  validateDto(EvidenceIdParamDto, 'params'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const params = req.params as unknown as EvidenceIdParamDto;
+      const evidence = await evidenceService.findOne(params.id);
+      res.json(evidence);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+
 }

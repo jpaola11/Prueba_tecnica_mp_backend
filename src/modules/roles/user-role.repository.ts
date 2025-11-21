@@ -49,4 +49,16 @@ export class UserRoleRepository {
 
     return Array.isArray(rows) ? rows : [];
   }
+
+  async findOne(id: number): Promise<any | null> {
+    const rows = await this.dataSource.query(
+      `
+      EXEC dbo.usp_UserRole_GetById
+        @usr_role_id = @0;
+      `,
+      [id]
+    );
+    return rows[0] ?? null;
+  }
+  
 }

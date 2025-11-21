@@ -389,4 +389,46 @@ export function buildUserRouter(userService: UserService): Router {
   );
 
   return router;
+
+  /**
+ * @openapi
+ * /users/{id}:
+ *   get:
+ *     summary: Obtener detalle de un usuario
+ *     description: Devuelve la información detallada del usuario solicitado.
+ *     tags:
+ *       - Usuarios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Identificador del usuario.
+ *     responses:
+ *       200:
+ *         description: Usuario obtenido correctamente.
+ *       400:
+ *         description: Parámetro inválido.
+ *       404:
+ *         description: Usuario no encontrado.
+ *       500:
+ *         description: Error interno.
+ */
+router.get(
+  '/:id',
+  jwtAuthMiddleware,
+  validateDto(UserIdParamDto, 'params'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const params = req.params as unknown as UserIdParamDto;
+      const user = await userService.findOne(params.id);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+
 }

@@ -313,4 +313,46 @@ export function buildOrgUnitRouter(orgUnitService: OrgUnitService): Router {
   );
 
   return router;
+
+  /**
+ * @openapi
+ * /org-unit/{id}:
+ *   get:
+ *     summary: Obtener detalle de una unidad organizacional
+ *     description: Devuelve la información de una unidad organizacional dentro de la estructura institucional.
+ *     tags:
+ *       - Unidades organizacionales
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: Identificador de la unidad organizacional.
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Unidad obtenida correctamente.
+ *       400:
+ *         description: Parámetro inválido.
+ *       404:
+ *         description: Unidad no encontrada.
+ *       500:
+ *         description: Error interno.
+ */
+router.get(
+  '/:id',
+  jwtAuthMiddleware,
+  validateDto(OrgUnitIdParamDto, 'params'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const params = req.params as unknown as OrgUnitIdParamDto;
+      const unit = await orgUnitService.findOne(params.id);
+      res.json(unit);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+
 }

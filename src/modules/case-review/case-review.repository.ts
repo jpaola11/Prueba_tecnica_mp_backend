@@ -54,4 +54,16 @@ export class CaseReviewRepository {
 
     return Array.isArray(rows) ? rows : [];
   }
+
+  async findOne(id: number): Promise<any | null> {
+    const rows = await this.dataSource.query(
+      `
+      EXEC dbo.usp_CaseReview_GetById
+        @rev_id = @0;
+      `,
+      [id]
+    );
+    return rows[0] ?? null;
+  }
+    
 }

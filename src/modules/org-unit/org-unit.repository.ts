@@ -101,4 +101,16 @@ export class OrgUnitRepository {
       [id, currentUserId],
     );
   }
+
+  async findOne(id: number): Promise<any | null> {
+    const rows = await this.dataSource.query(
+      `
+      EXEC dbo.usp_OrgUnit_GetById
+        @org_id = @0;
+      `,
+      [id]
+    );
+    return rows[0] ?? null;
+  }
+  
 }

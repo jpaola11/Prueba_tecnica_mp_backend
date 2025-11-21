@@ -300,4 +300,46 @@ export function buildRoleRouter(roleService: RoleService): Router {
   );
 
   return router;
+
+  /**
+ * @openapi
+ * /roles/{id}:
+ *   get:
+ *     summary: Obtener detalle de un rol
+ *     description: Devuelve la información del rol solicitado.
+ *     tags:
+ *       - Roles
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Identificador del rol.
+ *     responses:
+ *       200:
+ *         description: Rol obtenido correctamente.
+ *       400:
+ *         description: Parámetro inválido.
+ *       404:
+ *         description: Rol no encontrado.
+ *       500:
+ *         description: Error interno.
+ */
+router.get(
+  '/:id',
+  jwtAuthMiddleware,
+  validateDto(RoleIdParamDto, 'params'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const params = req.params as unknown as RoleIdParamDto;
+      const role = await roleService.findOne(params.id);
+      res.json(role);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+
 }

@@ -157,4 +157,21 @@ export class CaseReviewService {
       500,
     );
   }
+
+  async findOne(id: number) {
+    try {
+      return await this.caseReviewRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener la revisión con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+  
+      this.logger.error(internalMessage, (error as Error)?.stack, CaseReviewService.name);
+  
+      throw error;
+    }
+  }
+
+  
+  
 }

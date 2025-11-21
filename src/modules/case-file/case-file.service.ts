@@ -286,4 +286,20 @@ export class CaseFileService {
       500,
     );
   }
+
+  async findOne(id: number) {
+    try {
+      return await this.caseFileRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener el expediente con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+  
+      this.logger.error(internalMessage, (error as Error)?.stack, CaseFileService.name);
+  
+      throw error;
+    }
+  }
+
+  
 }

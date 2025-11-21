@@ -238,4 +238,20 @@ export class EvidenceService {
       500,
     );
   }
+
+  async findOne(id: number) {
+    try {
+      return await this.evidenceRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener la evidencia con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+  
+      this.logger.error(internalMessage, (error as Error)?.stack, EvidenceService.name);
+  
+      throw error;
+    }
+  }
+
+  
 }

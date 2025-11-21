@@ -205,4 +205,19 @@ export class RoleService {
       );
     }
   }
+
+  async findOne(id: number) {
+    try {
+      return await this.roleRepository.findOne(id);
+    } catch (error) {
+      const internalMessage = `Error técnico al obtener el rol con id ${id}. Detalle: ${
+        (error as Error)?.message ?? String(error)
+      }`;
+  
+      this.logger.error(internalMessage, (error as Error)?.stack, RoleService.name);
+  
+      throw error;
+    }
+  }
+  
 }
