@@ -19,7 +19,7 @@ export function buildUserModule(deps: UserModuleDeps): UserModule {
   const { dataSource, auditLogService } = deps;
 
   const userRepository = new UserRepository(dataSource);
-  const userService = new UserService(userRepository, auditLogService);
+  const userService = new UserService(userRepository,);
   const router = buildUserRouter(userService);
 
   return {

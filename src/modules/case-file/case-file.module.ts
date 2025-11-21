@@ -19,10 +19,7 @@ export function buildCaseFileModule(deps: CaseFileModuleDeps): CaseFileModule {
   const { dataSource, auditLogService } = deps;
 
   const caseFileRepository = new CaseFileRepository(dataSource);
-  const caseFileService = new CaseFileService(
-    caseFileRepository,
-    auditLogService,
-  );
+  const caseFileService = new CaseFileService(caseFileRepository);
   const router = buildCaseFileRouter(caseFileService);
 
   return {

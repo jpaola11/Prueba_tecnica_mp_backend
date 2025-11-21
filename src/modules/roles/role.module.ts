@@ -19,7 +19,7 @@ export function buildRoleModule(deps: RoleModuleDeps): RoleModule {
   const { dataSource, auditLogService } = deps;
 
   const roleRepository = new RoleRepository(dataSource);
-  const roleService = new RoleService(roleRepository, auditLogService);
+  const roleService = new RoleService(roleRepository,);
   const router = buildRoleRouter(roleService);
 
   return {

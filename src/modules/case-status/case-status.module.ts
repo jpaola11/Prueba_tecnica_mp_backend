@@ -23,7 +23,6 @@ export function buildCaseStatusModule(
   const caseStatusRepository = new CaseStatusRepository(dataSource);
   const caseStatusService = new CaseStatusService(
     caseStatusRepository,
-    auditLogService,
   );
   const router = buildCaseStatusRouter(caseStatusService);
 

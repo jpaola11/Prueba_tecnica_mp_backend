@@ -23,7 +23,6 @@ export function buildCaseReviewModule(
   const caseReviewRepository = new CaseReviewRepository(dataSource);
   const caseReviewService = new CaseReviewService(
     caseReviewRepository,
-    auditLogService,
   );
   const router = buildCaseReviewRouter(caseReviewService);
 

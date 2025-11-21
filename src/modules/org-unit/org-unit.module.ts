@@ -19,7 +19,7 @@ export function buildOrgUnitModule(deps: OrgUnitModuleDeps): OrgUnitModule {
   const { dataSource, auditLogService } = deps;
 
   const orgUnitRepository = new OrgUnitRepository(dataSource);
-  const orgUnitService = new OrgUnitService(orgUnitRepository, auditLogService);
+  const orgUnitService = new OrgUnitService(orgUnitRepository,);
   const router = buildOrgUnitRouter(orgUnitService);
 
   return {
